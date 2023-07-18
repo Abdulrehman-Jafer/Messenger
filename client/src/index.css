@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  font-family: "Roboto", sans-serif;
+  @apply transition-all;
+}
+
+.bottom-boder-radius {
+  border-radius: 0 0 2rem 2rem;
+}
+.pinkBorder:focus {
+  outline: none;
+  border: 2px solid;
+  @apply border-more-grayish;
+}
+
+.text-style {
+  max-width: 20ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.border-bottom-left {
+  border-radius: 0.9rem 0.9rem 0.9rem 0rem;
+}
+.last-child-border-bottom-white:last-child:hover {
+  border-bottom: 2px solid white;
+}
