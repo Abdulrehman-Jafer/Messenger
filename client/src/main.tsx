@@ -11,9 +11,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
       <Provider store={store}>
-        <ApiProvider api={api}>
-          <App />
-        </ApiProvider>
+        <App />
       </Provider>
     </BrowserRouter>
   </React.StrictMode>,

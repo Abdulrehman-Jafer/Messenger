@@ -29,3 +29,11 @@
 .last-child-border-bottom-white:last-child:hover {
   border-bottom: 2px solid white;
 }
+
+.custom-ok-button {
+  background: rgb(216, 48, 48);
+}
+
+.custom-ok-button:hover {
+  background: red !important;
+}

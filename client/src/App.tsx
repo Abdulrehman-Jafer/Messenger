@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom"
 // import { useValidateQuery } from "./redux/service/api"
 import { useTypedSelector, useAppDispatch } from "./redux/store"
 import { User, initializeUser } from "./redux/features/user-slice"
+import PageNotFound from "./screens/404"
 
 
 
@@ -24,15 +25,19 @@ export default function App() {
   const dispatch = useAppDispatch()
 
   useEffect(() => {
+    console.log(userData)
     if (userData?._id) {
-      navigate("/chats")
+      return navigate("/chats")
     } else if (!userData?._id && (Authorization && user?._id)) {
+      console.log("Dispatching")
       dispatch(initializeUser({ ...user, userToken: Authorization, lastLogin: 0 }))
-      navigate("/chats")
+      console.log(userData)
+      return navigate("/chats")
     } else {
-      navigate("/auth")
+      return navigate("/auth")
     }
-  }, [])
+  }, [userData])
+
 
   return (
     <main>
@@ -41,8 +46,13 @@ export default function App() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/auth/signup" element={<SignUp />} />
         <Route path="/auth/signin" element={<SignIn />} />
-        <Route path="/chats" element={<Home />} />
-        <Route path="/chats/:chat_space_id" element={<Chat_space />} />
+        {(userData?._id && (Authorization && user?._id)) && (
+          <>
+            <Route path="/chats" element={<Home />} />
+            <Route path="/chats/:chat_space_id" element={<Chat_space />} />
+          </>
+        )}
+        {/* <Route path="*" element={<PageNotFound />} /> */}
       </Routes>
     </main>
   )

@@ -1,12 +1,14 @@
-import { configureStore, ConfigureStoreOptions } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook } from "react-redux/es/types";
 import { useDispatch, useSelector } from "react-redux/es/exports";
 import { api } from "./service/api";
 import userReducer from "./features/user-slice";
+import contactReducer from "./features/contact-slice";
 
 export const store = configureStore({
   reducer: {
     userReducer,
+    contactReducer,
     [api.reducerPath]: api.reducer,
   },
   middleware: (getDefaultMiddleware) =>

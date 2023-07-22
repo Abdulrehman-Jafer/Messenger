@@ -5,10 +5,13 @@ import { toast } from "react-hot-toast"
 import { setSessionStorage } from "../utils/sessionSorage";
 import { useContinueWithGoogleMutation } from "../redux/service/api";
 import { useEffect } from "react"
+import { initializeUser } from "../redux/features/user-slice";
+import { useAppDispatch } from "../redux/store";
 
 export default function Auth() {
     const navigate = useNavigate()
     const [googleSign, { isLoading, isSuccess, error, isError, data }] = useContinueWithGoogleMutation()
+    const dispatch = useAppDispatch()
 
 
     useEffect(() => {
@@ -23,6 +26,8 @@ export default function Auth() {
                 toast.success("Log In Successful")
                 setSessionStorage("authorization", data.token)
                 setSessionStorage("user", data.user)
+                dispatch(initializeUser({ ...data.user, userToken: data.token, lastLogin: 0 }))
+                navigate("/chats")
             } else {
                 toast.error((error as Error)?.message || "Could not Sign In")
             }

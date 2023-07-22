@@ -46,6 +46,28 @@ export const api = createApi({
         };
       },
     }),
+    getContacts: builder.query<any, any>({
+      query: ({ user_id, Authorization }) => {
+        console.log(user_id);
+        return {
+          url: `contact/${user_id}`,
+          headers: {
+            Authorization,
+          },
+        };
+      },
+      providesTags: ["Contacts"],
+    }),
+    createContact: builder.mutation<any, any>({
+      query(requestBody) {
+        return {
+          url: "/contact/create",
+          body: requestBody,
+          method: "POST",
+        };
+      },
+      invalidatesTags: ["Contacts"],
+    }),
   }),
 });
 
@@ -54,4 +76,6 @@ export const {
   useSingInMutation,
   useValidateQuery,
   useContinueWithGoogleMutation,
+  useGetContactsQuery,
+  useCreateContactMutation,
 } = api;

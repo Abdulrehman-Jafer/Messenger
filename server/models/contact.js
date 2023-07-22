@@ -1,7 +1,7 @@
 import { Schema,Types,model, } from "mongoose";
 
 const schema = new Schema({
-        contact_id: 
+        contact: 
         {
          type: Types.ObjectId,
          ref: "User",
@@ -17,3 +17,7 @@ const schema = new Schema({
             required: true
         }
 })
+
+const Contact = new model("Contact",schema)
+
+export default Contact;

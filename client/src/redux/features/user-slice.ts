@@ -26,8 +26,8 @@ const userSlice = createSlice({
   name: "User",
   initialState,
   reducers: {
-    initializeUser: function (state, action: PayloadAction<User>) {
-      return (state = action.payload);
+    initializeUser: function (_, action: PayloadAction<User>) {
+      return { ...action.payload };
     },
     uninitializeUser: function () {
       return initialState;

@@ -133,8 +133,6 @@ const chat_space = {
 
 export default function Chat_space() {
     const navigate = useNavigate()
-
-
     const Logged_In_User = { name: "Sara", image: dummy_image }
     const Connected_to = chat_space.user1_id.name == Logged_In_User.name ? chat_space.user2_id : chat_space.user1_id
     return (
