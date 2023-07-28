@@ -6,3 +6,11 @@ export function onChangeHandler<T>(
   const { name, value } = event.target as HTMLInputElement;
   setFields((prev) => ({ ...prev, [name]: value }));
 }
+
+export function findInContact(_id: string, contacts: any[]) {
+  return contacts.find((c) => c.contact == _id);
+}
+
+export function getLastItem(array: []) {
+  return array[array.length - 1];
+}

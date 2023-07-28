@@ -5,7 +5,7 @@ const baseUrl = "http://localhost:3000/";
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl }),
-  tagTypes: ["Contacts"],
+  tagTypes: ["Contacts", "Chats"],
   endpoints: (builder) => ({
     createUser: builder.mutation<any, any>({
       query(requestBody) {
@@ -68,6 +68,27 @@ export const api = createApi({
       },
       invalidatesTags: ["Contacts"],
     }),
+    getChats: builder.query<any, any>({
+      query: ({ user_id, Authorization }) => {
+        return {
+          url: `/chatspace/${user_id}`, //http://localhost:3000/chatspace/64b421f9e21fede38c9084ee
+          headers: {
+            Authorization,
+          },
+        };
+      },
+      providesTags: ["Chats"],
+    }),
+    createChat: builder.mutation<any, any>({
+      query: (requsetBody) => {
+        return {
+          url: `chatspace/create`,
+          method: "POST",
+          body: requsetBody,
+        };
+      },
+      invalidatesTags: ["Chats"],
+    }),
   }),
 });
 
@@ -78,4 +99,6 @@ export const {
   useContinueWithGoogleMutation,
   useGetContactsQuery,
   useCreateContactMutation,
+  useCreateChatMutation,
+  useGetChatsQuery,
 } = api;

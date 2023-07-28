@@ -8,6 +8,8 @@ import session from "express-session"
 import session_store from "./configs/session-store.js"
 import {fileFilter,storage} from "./configs/multer_config.js"
 import contactRoutes from "./routes/contact.js";
+import chatSpaceRoutes from "./routes/chatspace.js"
+import messageRoutes from "./routes/message.js"
 
 
 const app = express()
@@ -20,6 +22,8 @@ app.use("/storage",express.static("./storage"))
 
 app.use("/auth",authRoutes)
 app.use("/contact",contactRoutes)
+app.use("/chatspace",chatSpaceRoutes)
+app.use("/message", messageRoutes)
 
 
 

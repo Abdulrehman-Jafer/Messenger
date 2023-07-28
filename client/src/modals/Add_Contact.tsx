@@ -39,7 +39,7 @@ const Add_Contact = ({ isModalOpen, setIsModalOpen, user_id }: { isModalOpen: bo
         <Modal title="Create new contact" centered open={isModalOpen} onOk={handleOk} onCancel={handleCancel} okText={"Create"} okButtonProps={{ className: 'custom-ok-button', loading: isLoading, }}>
             <div className='flex flex-col gap-6'>
                 <Input name="saved_as" type="text" size="lg" label="Name" required value={fields.saved_as} onChange={(e) => onChangeHandler(e, setFields)} />
-                <Input name="contact_id" type="text" size="lg" label="User Id:" required value={fields.contact_id} onChange={(e) => onChangeHandler(e, setFields)} />
+                <Input name="contact_id" type="text" size="lg" label="Contact's User id" required value={fields.contact_id} onChange={(e) => onChangeHandler(e, setFields)} />
             </div>
         </Modal>
     );

@@ -7,44 +7,13 @@ const schema = new Schema({
             ref:"User"
         }
     ],
-    message: [
-    {
-        content: 
+    messages: [
         {
-            type: String,
-            value:String,
-            required: true,
-        },
-        sender: 
-        {
-            type: Types.ObjectId,
-            ref: "User",
-            required: true
-        },
-        receiver: 
-        {
-            type: Types.ObjectId,
-            ref:"User",
-            required: true
-        },
-        status: 
-        {
-            type: String,
-            required: true,
-        },
-        deletedFor:[
-            {
-                type:Types.ObjectId,
-                ref:"User"
-            }
-        ],
-        createdAt: 
-        {
-            type: Number,
-            required: true
-        }
+        type: Types.ObjectId,
+        ref:"Message"
     }
 ]
-},{timestamps})
+},{timestamps:true})
 
-export default new model("chatspace",schema)
+const Chatspace = new model("Chatspace",schema)
+export default Chatspace;

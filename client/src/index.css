@@ -4,7 +4,6 @@
 
 * {
   font-family: "Roboto", sans-serif;
-  @apply transition-all;
 }
 
 .bottom-boder-radius {
@@ -36,4 +35,15 @@
 
 .custom-ok-button:hover {
   background: red !important;
+}
+
+.contacts-min-height {
+  min-height: calc(100vh - 247px);
+}
+
+.maxCharacter {
+  max-width: 8ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

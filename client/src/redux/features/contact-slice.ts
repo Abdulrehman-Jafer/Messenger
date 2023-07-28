@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { User } from "./user-slice";
 
 interface Contact {
+  _id: string;
   contact: Partial<User>;
   saved_as: string;
   saved_by: string;

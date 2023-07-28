@@ -36,7 +36,10 @@ const schema = new Schema({
             required: true
         }
     ],
-    lastLogin: Number,
+    lastLogin: {
+      type:  Number,
+      default: 0
+    },
     
 },{timestamps:true})
 

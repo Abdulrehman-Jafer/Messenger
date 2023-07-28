@@ -19,7 +19,6 @@ const getContacts = async (req,res,next) => {
 const createContact = async (req,res,next) => {
   try {
     const {contact_id,saved_by,saved_as} = req.body;
-    console.log({body:req.body})
     if(!contact_id || !saved_by || !saved_as){
         return res.status(400).json({
             message:"Bad request || incomplete body",
@@ -32,6 +31,7 @@ const createContact = async (req,res,next) => {
             message:"Invalid Contact Id",
             body: req.body
         })
+
     }
     const doesAlreadySaved = await Contact.exists({saved_by,contact:contact_id})
     if(doesAlreadySaved){
