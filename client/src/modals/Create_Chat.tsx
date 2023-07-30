@@ -2,20 +2,18 @@ import { Dispatch, SetStateAction, useState, useEffect } from 'react';
 import { Modal } from 'antd';
 import { Input } from '@material-tailwind/react';
 import { onChangeHandler } from '../utils/misc';
-import { useCreateChatMutation, useCreateContactMutation } from '../redux/service/api';
+import { useCreateChatMutation } from '../redux/service/api';
 import { toast } from 'react-hot-toast';
 import { useTypedSelector } from '../redux/store';
+import { useNavigate } from 'react-router-dom';
 
 const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, setIsModalOpen: Dispatch<SetStateAction<boolean>>, }) => {
-    const [fields, setFields] = useState<Record<string, any>>({
-        isNameOrId: "contact_name",
-        contact_id: "",
-        contact_name: "",
-        contact: ""
-    })
+    const [fields, setFields] = useState<Record<string, any>>({ isNameOrId: "contact_name", contact_id: "", contact_name: "", contact: "" })
     const contacts = useTypedSelector(selector => selector.contactReducer)
     const User = useTypedSelector(selector => selector.userReducer)
     const [createContact, { isError, isLoading, isSuccess, error, data }] = useCreateChatMutation()
+    const navigate = useNavigate()
+
     useEffect(() => {
         let loaderId;
         if (isLoading) {
@@ -27,9 +25,11 @@ const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, se
             isSuccess ? toast.success(`${fields.contact_name} added to the contacts`) : toast.error((error as any)?.data?.message || "Failed to Complete")
             if (isSuccess) {
                 setIsModalOpen(false)
+                navigate(`/chats/${data.result.chatspace._id}`)
             }
         }
     }, [isLoading])
+
 
     const handleOk = async () => {
         await createContact({ between: [User._id, fields.contact._id] })

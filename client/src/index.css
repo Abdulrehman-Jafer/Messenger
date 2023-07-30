@@ -40,6 +40,12 @@
 .contacts-min-height {
   min-height: calc(100vh - 247px);
 }
+.chatList-min-height {
+  min-height: calc(100vh - 288px);
+}
+.chatspace-min-height {
+  min-height: calc(100vh - 200px);
+}
 
 .maxCharacter {
   max-width: 8ch;

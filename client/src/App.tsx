@@ -48,10 +48,9 @@ export default function App() {
         {(userData?._id && (Authorization && user?._id)) && (
           <>
             <Route path="/chats" element={<Home />} />
-            <Route path="/chats/:chat_space_id" element={<Chat_space />} />
+            <Route path="/chats/:chatspace_id" element={<Chat_space />} />
             <Route path="/contacts" element={<Contacts />} />
             <Route path="/contacts/:contact_id" element={<Contact_details />} />
-
           </>
         )}
         {/* <Route path="*" element={<PageNotFound />} /> */}

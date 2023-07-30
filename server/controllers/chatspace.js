@@ -7,21 +7,18 @@ export const getUserChatSpace = async (req,res,next) => {
         const chatspaces = await Chatspace.find({
             between: {$in: [user_id]}
         }).populate({path:"between",model:"User"}).populate({path:"messages",model:"Message"}).exec()
-        // .populate({
-        //     path:"messages",
-        //     model:"Message"
-        // })
-        const userContacts = await Contact.find({
-            saved_by : user_id
-        })
+
+        const userContacts = await Contact.find({ saved_by : user_id})
 
 const modifiedChatSpaces = chatspaces.map(c => {
-    const receiverUser = c.between.find(_id => _id != user_id);
-    const savedContact = userContacts.find(c => c.contact == receiverUser._id);
-    const receiver = { user: receiverUser, contact: savedContact, isSaved: savedContact ? true : false };
-    const sender = c.between.find(c => c._id == user_id);
+    const connected_to = c.between.find(otherUser => !otherUser._id.equals(user_id))
+    const savedContact = userContacts.find(c => {
+        return c.contact.toString() == connected_to._id.toString()
+    });
+    const receiver = { connected_to, contact: savedContact, isSaved: savedContact ? true : false };
+    const sender = c.between.find(c => c._id.equals(user_id));
     return {
-        sender,receiver: receiver,messages: c.messages
+        sender,receiver: receiver,messages: c.messages,_id: c._id
     }
 })
 
@@ -68,3 +65,23 @@ export const createChatSpace = async (req,res,next) => {
         next(error)
     }
 }
+
+// export const getChatSpace = async (req,res,next) => {
+//     const {chatspace_id} = req.params;
+//     try {
+//         const chatspace = await Chatspace.findOne({_id : chatspace_id}).
+//         populate({path:"between",model:"User"}).populate({path:"messages",model:"Message"})
+//         const connected_to = c.between.find(otherUser => !otherUser._id.equals(user_id))
+//         res.status(200).json({
+//             responseCode: 200,
+//             responseMessage: "Fetched chatSpace successfully",
+//             result: {
+//                 chatspace
+//             }
+//         })
+//     } catch (error) {
+//         error.text = "Error In getting Chatspace"
+//         next(error)
+//     }
+    
+// }

@@ -36,23 +36,23 @@ export const api = createApi({
       },
     }),
     validate: builder.query<any, any>({
-      query: ({ Authorization, User_id }) => {
+      query: ({ authorization, User_id }) => {
         return {
           url: "auth/validate-token",
           headers: {
-            Authorization,
+            authorization,
             User_id,
           },
         };
       },
     }),
     getContacts: builder.query<any, any>({
-      query: ({ user_id, Authorization }) => {
+      query: ({ user_id, authorization }) => {
         console.log(user_id);
         return {
           url: `contact/${user_id}`,
           headers: {
-            Authorization,
+            authorization,
           },
         };
       },
@@ -69,11 +69,11 @@ export const api = createApi({
       invalidatesTags: ["Contacts"],
     }),
     getChats: builder.query<any, any>({
-      query: ({ user_id, Authorization }) => {
+      query: ({ user_id, authorization }) => {
         return {
           url: `/chatspace/${user_id}`, //http://localhost:3000/chatspace/64b421f9e21fede38c9084ee
           headers: {
-            Authorization,
+            authorization,
           },
         };
       },
@@ -89,6 +89,16 @@ export const api = createApi({
       },
       invalidatesTags: ["Chats"],
     }),
+    // getSpecificChat: builder.query<any, any>({
+    //   query: ({ chatspace_id, authorization }) => {
+    //     return {
+    //       url: `/chatspace/getchat/${chatspace_id}`,
+    //       headers: {
+    //         authorization,
+    //       },
+    //     };
+    //   },
+    // }),
   }),
 });
 
@@ -101,4 +111,5 @@ export const {
   useCreateContactMutation,
   useCreateChatMutation,
   useGetChatsQuery,
+  // useGetSpecificChatQuery,
 } = api;

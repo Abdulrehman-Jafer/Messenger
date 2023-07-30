@@ -4,16 +4,16 @@ type Recent_Chat_Props = {
     name: string,
     last_message: string,
     active_status: string,
-    user_image: string
+    user_image: string,
+    chatspace_id: string
 }
 
 export default function Recent_Chat(props: Recent_Chat_Props) {
     const navigate = useNavigate()
-    console.log({ props })
     const image_src = props.user_image?.startsWith("storage") ? `http://localhost:3000/${props.user_image}` : props.user_image
     return (
         <main>
-            <article className="flex justify-between items-center gap-4 p-[1rem] hover:bg-pink-red cursor-pointer" onClick={() => navigate(`/chats/${props.name}`)}>
+            <article className="flex justify-between items-center gap-4 p-[1rem] hover:bg-pink-red cursor-pointer" onClick={() => navigate(`/chats/${props.chatspace_id}`)}>
                 <section>
                     <img src={image_src} alt="contact_image" className="h-10 w-10 rounded-full" />
                 </section>

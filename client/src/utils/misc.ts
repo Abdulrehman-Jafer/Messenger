@@ -11,6 +11,6 @@ export function findInContact(_id: string, contacts: any[]) {
   return contacts.find((c) => c.contact == _id);
 }
 
-export function getLastItem(array: []) {
+export function getLastItem(array: any[]) {
   return array[array.length - 1];
 }

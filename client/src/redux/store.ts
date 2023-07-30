@@ -4,10 +4,12 @@ import { useDispatch, useSelector } from "react-redux/es/exports";
 import { api } from "./service/api";
 import userReducer from "./features/user-slice";
 import contactReducer from "./features/contact-slice";
+import chatReducer from "./features/chat-slice";
 
 export const store = configureStore({
   reducer: {
     userReducer,
+    chatReducer,
     contactReducer,
     [api.reducerPath]: api.reducer,
   },
