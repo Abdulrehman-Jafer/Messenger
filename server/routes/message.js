@@ -1,7 +1,7 @@
 import express from "express";
-import {createMessage} from "../controllers/message.js"
+import {sendMessage} from "../controllers/message.js"
 const router = express.Router();
 
-router.post("/send",createMessage)
+router.post("/send",sendMessage)
 
 export default router;

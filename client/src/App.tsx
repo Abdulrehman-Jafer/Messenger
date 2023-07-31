@@ -15,6 +15,7 @@ import { User, initializeUser } from "./redux/features/user-slice"
 // import PageNotFound from "./screens/404"
 import Contacts from "./screens/Contacts"
 import Contact_details from "./screens/Contact_details"
+import socket from "./socket-io/socket"
 
 
 

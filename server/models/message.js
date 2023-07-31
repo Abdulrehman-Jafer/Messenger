@@ -22,11 +22,7 @@ const schema = new Schema({
             ref:"User",
             required: true
         },
-        status: 
-        {
-            type: String,
-            required: true,
-        },
+        status: Number,
         deletedFor:[
             {
                 type:Types.ObjectId,

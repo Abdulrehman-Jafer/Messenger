@@ -66,7 +66,7 @@ export const api = createApi({
           method: "POST",
         };
       },
-      invalidatesTags: ["Contacts"],
+      invalidatesTags: ["Contacts", "Chats"],
     }),
     getChats: builder.query<any, any>({
       query: ({ user_id, authorization }) => {

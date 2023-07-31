@@ -12,9 +12,9 @@ import { setGlobalContacts } from "../redux/features/contact-slice"
 import { toast } from "react-hot-toast"
 import RecentContact from "../components/RecentContact"
 import Create_Chat from "../modals/Create_Chat"
-import { getLastItem } from "../utils/misc"
 import { ChatSpace } from "../redux/features/chat-slice"
 import { initializeChatSpace } from "../redux/features/chat-slice"
+import socket from "../socket-io/socket"
 
 export default function Home() {
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -32,6 +32,13 @@ export default function Home() {
         }
         isError && toast.error("Failed to Load Contacts")
     }, [isLoading || isFetching])
+
+    useEffect(() => {
+        socket.connect()
+        return () => {
+            socket.disconnect()
+        }
+    }, [])
 
 
     useEffect(() => {
@@ -85,7 +92,7 @@ export default function Home() {
                         {(chats && chats.length) > 0 ? chats.map(c => {
                             return <Recent_Chat
                                 active_status={"2:34pm"}
-                                last_message={getLastItem(c.messages) || "No recent Message"}
+                                last_message={"No recent Message"}
                                 name={c.receiver.isSaved ? c.receiver.contact.saved_as : c.receiver.connected_to._id}
                                 user_image={c.receiver.connected_to.image}
                                 chatspace_id={c._id}

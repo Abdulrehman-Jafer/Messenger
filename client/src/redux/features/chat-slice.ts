@@ -8,6 +8,18 @@ interface Contact {
   saved_by: string;
 }
 
+export interface Message {
+  _id: string;
+  belongsTo: string;
+  content: string;
+  sender: User;
+  receiver: string;
+  status: number;
+  deletedFor: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ChatSpace {
   sender: User;
   receiver: {
@@ -15,7 +27,7 @@ export interface ChatSpace {
     contact: Contact;
     isSaved: boolean;
   };
-  messages: any[]; // Assuming that messages is an array of any type
+  messages: Message[];
   _id: string;
 }
 

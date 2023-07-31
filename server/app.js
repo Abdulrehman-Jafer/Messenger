@@ -10,6 +10,9 @@ import {fileFilter,storage} from "./configs/multer_config.js"
 import contactRoutes from "./routes/contact.js";
 import chatSpaceRoutes from "./routes/chatspace.js"
 import messageRoutes from "./routes/message.js"
+import http from "http"
+import {Server} from "socket.io"
+import axios from "axios";
 
 
 const app = express()
@@ -40,9 +43,35 @@ app.use((error,req,res,next)=>{
      console.log(error)
     return res.status(error.statusCode).json(error)
 })
+const server = http.createServer(app)
+const io  = new Server(server,{
+    cors: {
+        origin:"*",
+        methods:"*"
+    }
+})
+
+io.on("connection",(socket)=>{
+    console.log(`${socket.id} connected`)
+    socket.on("disconnect",()=>{
+        console.log(`${socket.id} disconnected`)
+    })
+    
+    socket.on("send-message",(data)=>{
+        console.log(data);
+        axios.post("http://localhost:3000/message/send",data).then(res => console.log(res)).catch(err => {
+            console.log(err)
+        })
+        // Do something with the received data, e.g., broadcasting it to all connected clients:
+        // Add message into the chatspace
+        io.emit("receive-message", data);
+        // socket.broadcast(data)
+    })
+})
+
 
 mongoose.connect(process.env.MONGO_URI).then(()=>{
-    app.listen(process.env.PORT,()=>console.log("Listening!"))
+    server.listen(process.env.PORT,()=>console.log("Listening!"))
 }).catch((error)=>{
     throw new Error(error)
 })

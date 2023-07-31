@@ -6,9 +6,9 @@ export const getUserChatSpace = async (req,res,next) => {
     try {
         const chatspaces = await Chatspace.find({
             between: {$in: [user_id]}
-        }).populate({path:"between",model:"User"}).populate({path:"messages",model:"Message"}).exec()
+        }).populate({path:"between",model:"User"}).populate({path:"messages",model:"Message",populate:{path:"sender",model:"User"}}).exec()
 
-        const userContacts = await Contact.find({ saved_by : user_id})
+        const userContacts = await Contact.find({ saved_by : user_id}) 
 
 const modifiedChatSpaces = chatspaces.map(c => {
     const connected_to = c.between.find(otherUser => !otherUser._id.equals(user_id))

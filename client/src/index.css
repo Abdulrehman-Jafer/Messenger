@@ -23,7 +23,7 @@
 }
 
 .border-bottom-left {
-  border-radius: 0.9rem 0.9rem 0.9rem 0rem;
+  border-radius: 0.5rem 0.5rem 0.5rem 0rem;
 }
 .last-child-border-bottom-white:last-child:hover {
   border-bottom: 2px solid white;
@@ -41,10 +41,10 @@
   min-height: calc(100vh - 247px);
 }
 .chatList-min-height {
-  min-height: calc(100vh - 288px);
+  min-height: calc(100vh - 271px);
 }
 .chatspace-min-height {
-  min-height: calc(100vh - 200px);
+  min-height: calc(100vh - 130px);
 }
 
 .maxCharacter {
