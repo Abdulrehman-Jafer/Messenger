@@ -33,14 +33,13 @@ export default function Message({ createdAt, content, sender, nextMsgSenderId, n
         <main>
             <section ref={!nextMsgTime ? messageRef : null} className={`flex items-center gap-2 ${isSentByLoggedInUser ? "justify-end" : "justify-start"} ${marginBottom}`}>
                 {!isSentByLoggedInUser && (
-
                     <div className="h-10 w-10 flex-shrink-0">
                         <img src={sender?.image.startsWith("storage") ? `http://localhost:3000/${sender.image}` : sender?.image} alt="sender_image" className="h-full w-full rounded-full" />
                     </div>
                 )}
                 <div className="relative">
                     <p className={`${isSentByLoggedInUser ? "bg-pink-red text-white" : "bg-grayish text-blueish"} px-4 py-2 border-bottom-left max-w-[100%]`}>{content}</p>
-                    {willShowTime && <small className="absolute bottom-[-1.2rem] right-1 text-more-grayish">{createdAt}</small>}
+                    {willShowTime && <small className="absolute bottom-[-1.2rem] right-1 text-more-grayish min-w-50px">{createdAt}</small>}
                 </div>
             </section>
         </main>

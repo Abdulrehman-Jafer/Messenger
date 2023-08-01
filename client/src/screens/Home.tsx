@@ -12,9 +12,10 @@ import { setGlobalContacts } from "../redux/features/contact-slice"
 import { toast } from "react-hot-toast"
 import RecentContact from "../components/RecentContact"
 import Create_Chat from "../modals/Create_Chat"
-import { ChatSpace } from "../redux/features/chat-slice"
+import { ChatSpace, updateUserOnlineStatusInChatspace } from "../redux/features/chat-slice"
 import { initializeChatSpace } from "../redux/features/chat-slice"
 import socket from "../socket-io/socket"
+import { setUserSocketId } from "../redux/features/user-slice"
 
 export default function Home() {
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -35,6 +36,13 @@ export default function Home() {
 
     useEffect(() => {
         socket.connect()
+        socket.on("connect", () => {
+            socket.emit("set-socketId", User)
+            dispatch(setUserSocketId(socket.id))
+        })
+        socket.on("user-online", data => {
+            dispatch(updateUserOnlineStatusInChatspace({ onlineUser_id: data._id, socketId: data.socketId }))
+        })
         return () => {
             socket.disconnect()
         }
@@ -88,7 +96,7 @@ export default function Home() {
                             </div>
                         </section>
                     </article>
-                    <article className="flex flex-col last-child-border-bottom-white chatList-min-height">
+                    <article className="flex flex-col chatList-min-height">
                         {(chats && chats.length) > 0 ? chats.map(c => {
                             return <Recent_Chat
                                 active_status={"2:34pm"}

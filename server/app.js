@@ -13,7 +13,10 @@ import messageRoutes from "./routes/message.js"
 import http from "http"
 import {Server} from "socket.io"
 import axios from "axios";
-
+import User from "./models/user.js";
+import { Types } from "mongoose";
+import Message from "./models/message.js";
+import Chatspace from "./models/chatspace.js";
 
 const app = express()
 dotenv.config();
@@ -53,19 +56,40 @@ const io  = new Server(server,{
 
 io.on("connection",(socket)=>{
     console.log(`${socket.id} connected`)
-    socket.on("disconnect",()=>{
-        console.log(`${socket.id} disconnected`)
+    socket.on("disconnect",async ()=>{
+        const user = await User.findOneAndUpdate({socketId: socket.id},{socketId: ""},{new: true})
+        console.log(`${user?.name || socket.id} disconnected`)
     })
-    
-    socket.on("send-message",(data)=>{
-        console.log(data);
-        axios.post("http://localhost:3000/message/send",data).then(res => console.log(res)).catch(err => {
-            console.log(err)
+
+    socket.on("set-socketId",async (user_data)=>{
+       const user = await User.findOneAndUpdate({_id: user_data._id},{socketId: socket.id,lastLogin: 0 },{new: true})
+       // BroadCast this User Got Online and Sender this user_data with the
+       socket.broadcast.emit("user-online",user)
+    })
+    socket.on("send-message",async (data)=>{
+        const message = new Message({
+            belongsTo: data.belongsTo,
+            content: data.content,
+            sender: data.sender._id,
+            receiver: data.receiver,
+            status: 0,
+            deletedFor: []
         })
+        const savetheMessage = message.save()
+        const updatetheChatspace = Chatspace.findOneAndUpdate(
+            {_id: message.belongsTo},
+            {$push: {messages: message}},
+            {new: true})
+        console.log({socketIdOfSender: data.sender.socketId,receiver: data.receiver.socketId})
+        if(data.receiver.socketId){
+            socket.to(data.receiver.socketId).emit("receive-message",{message,sender:data.sender})
+        }
+        socket.to(data.sender.socketId).emit("message-saved",{prevId: data._id, message})
         // Do something with the received data, e.g., broadcasting it to all connected clients:
         // Add message into the chatspace
-        io.emit("receive-message", data);
         // socket.broadcast(data)
+        await savetheMessage
+        await updatetheChatspace
     })
 })
 

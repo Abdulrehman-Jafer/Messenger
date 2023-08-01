@@ -40,7 +40,7 @@ const schema = new Schema({
       type:  Number,
       default: 0
     },
-    
+    socketId : String
 },{timestamps:true})
 
 const User = new model("User",schema)

@@ -36,7 +36,7 @@ export default function App() {
     } else {
       return navigate("/auth")
     }
-  }, [userData])
+  }, [])
 
 
   return (

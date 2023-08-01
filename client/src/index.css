@@ -25,9 +25,6 @@
 .border-bottom-left {
   border-radius: 0.5rem 0.5rem 0.5rem 0rem;
 }
-.last-child-border-bottom-white:last-child:hover {
-  border-bottom: 2px solid white;
-}
 
 .custom-ok-button {
   background: rgb(216, 48, 48);
