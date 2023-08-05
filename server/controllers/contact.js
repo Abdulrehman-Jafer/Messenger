@@ -4,7 +4,7 @@ import User from "../models/user.js"
 const getContacts = async (req,res,next) => {
     try {
         const { user_id } = req.params;
-        const contacts = await Contact.find({saved_by:user_id}).populate("contact").exec()
+        const contacts = await Contact.find({saved_by:user_id}).populate("contact").sort({"contact.lastLogin": 1}).exec()
         return res.status(200).json({
             message:"Contacts retreiving Successful",
             contacts

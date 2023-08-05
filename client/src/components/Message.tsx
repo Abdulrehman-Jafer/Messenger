@@ -37,9 +37,9 @@ export default function Message({ createdAt, content, sender, nextMsgSenderId, n
                         <img src={sender?.image.startsWith("storage") ? `http://localhost:3000/${sender.image}` : sender?.image} alt="sender_image" className="h-full w-full rounded-full" />
                     </div>
                 )}
-                <div className="relative">
+                <div className="flex flex-col">
                     <p className={`${isSentByLoggedInUser ? "bg-pink-red text-white" : "bg-grayish text-blueish"} px-4 py-2 border-bottom-left max-w-[100%]`}>{content}</p>
-                    {willShowTime && <small className="absolute bottom-[-1.2rem] right-1 text-more-grayish min-w-50px">{createdAt}</small>}
+                    {willShowTime && <small className="text-more-grayish text-right">{createdAt}</small>}
                 </div>
             </section>
         </main>

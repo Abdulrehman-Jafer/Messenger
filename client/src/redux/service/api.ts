@@ -89,6 +89,16 @@ export const api = createApi({
       },
       invalidatesTags: ["Chats"],
     }),
+    getAllChatSpaceMessages: builder.query<any, any>({
+      query: ({ user_id }) => {
+        return {
+          url: `chatspace/getchat/all/${user_id}`,
+          headers: {
+            user_id,
+          },
+        };
+      },
+    }),
     // getSpecificChat: builder.query<any, any>({
     //   query: ({ chatspace_id, authorization }) => {
     //     return {
@@ -111,5 +121,5 @@ export const {
   useCreateContactMutation,
   useCreateChatMutation,
   useGetChatsQuery,
-  // useGetSpecificChatQuery,
+  useGetAllChatSpaceMessagesQuery,
 } = api;

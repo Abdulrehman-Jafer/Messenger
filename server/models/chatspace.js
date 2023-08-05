@@ -7,12 +7,11 @@ const schema = new Schema({
             ref:"User"
         }
     ],
-    messages: [
-        {
+    lastMessage: {
         type: Types.ObjectId,
         ref:"Message"
-    }
-]
+}
+
 },{timestamps:true})
 
 const Chatspace = new model("Chatspace",schema)

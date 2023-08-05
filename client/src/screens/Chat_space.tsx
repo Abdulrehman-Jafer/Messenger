@@ -1,55 +1,29 @@
 import { IoIosArrowBack } from "react-icons/io"
 import Message from "../components/Message"
 import { useNavigate, useParams } from "react-router-dom"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 // import { useGetSpecificChatQuery } from "../redux/service/api"
 import { useAppDispatch, useTypedSelector } from "../redux/store"
-import { toast } from "react-hot-toast"
-import { User } from "../redux/features/user-slice"
-import { Contact } from "../redux/features/contact-slice"
 import { getTimeWithAMPMFromDate } from "../utils/time"
 import { AiOutlineSend } from "react-icons/ai"
 import socket from "../socket-io/socket"
-import { addMessage, updateMessageStatus } from "../redux/features/chat-slice"
+import { addMessagesInChatspace } from "../redux/features/messages-slice"
 
 
 export default function Chat_space() {
     const navigate = useNavigate()
     const { chatspace_id } = useParams()
+    const chatspaceMessages = useTypedSelector(selector => selector.messageReducer)
+    const indexOfCurrent = chatspaceMessages.findIndex(m => m.chatspace_id == chatspace_id)
     const chatspace = useTypedSelector(selector => selector.chatReducer).find(c => c._id == chatspace_id)
     const User = useTypedSelector(selector => selector.userReducer)
     const [message, setMessage] = useState("")
     const dispatch = useAppDispatch()
 
-    useEffect(() => {
-        function receiveMessageHandler(data: any) {
-            console.log("MessageReceived", data)
-            const message = data.message;
-            message.sender = data.sender
-            dispatch(addMessage({ chatspace_id, newMessage: message }))
-        }
-        function saveMessageHandler(data: any) {
-            console.log("MessageSaved", data)
-            dispatch(updateMessageStatus({ chatspace_id, prevId: data.prevId, savedMessage: data.savedMessage }))
-        }
-        if (!socket.connected) {
-            socket.connect()
-        }
-        socket.on("message-saved", saveMessageHandler)
-        socket.on("receive-message", receiveMessageHandler)
-
-        return () => {
-            if (socket.connected) {
-                socket.disconnect()
-            }
-            socket.off("message-saved", saveMessageHandler)
-            socket.off("receive-message", receiveMessageHandler)
-        }
-    }, [])
+    const messages = chatspaceMessages[indexOfCurrent]?.messages || []
 
     const sendMessage = (e: React.FormEvent) => {
         e.preventDefault()
-        console.log({ receiverSocketId: chatspace?.receiver.connected_to.socketId })
         const randomId = crypto.randomUUID()
 
         const data = {
@@ -63,10 +37,10 @@ export default function Chat_space() {
             _id: randomId
         }
         if (data.content) {
+            console.log({ connected: socket.connected })
             socket.emit("send-message", data)
-            dispatch(addMessage({ chatspace_id, newMessage: data }))
+            dispatch(addMessagesInChatspace({ chatspace_id, newMessage: data }))
             setMessage("")
-
         } else {
             alert("No message")
         }
@@ -90,12 +64,12 @@ export default function Chat_space() {
                 </div>
             </section>
             <section className="flex flex-col p-[1rem] last-child-border-bottom-white chatspace-min-height">
-                {chatspace.messages.length > 0 ?
-                    chatspace.messages.map((m, i) => {
+                {messages.length > 0 ?
+                    messages.map((m, i) => {
                         const currentMessageTime = getTimeWithAMPMFromDate(m.createdAt)
-                        const nextMessageTime = chatspace.messages[i + 1]?.createdAt
+                        const nextMessageTime = messages[i + 1]?.createdAt
                         const stylingData = {
-                            nextMsgSender: chatspace.messages[i + 1]?.sender,
+                            nextMsgSender: messages[i + 1]?.sender,
                             nextMsgTime: getTimeWithAMPMFromDate(nextMessageTime)
                         }
                         return <Message createdAt={currentMessageTime} content={m?.content} sender={m?.sender} receiver={m?.receiver} status={m?.status} nextMsgSenderId={stylingData?.nextMsgSender?._id} nextMsgTime={stylingData?.nextMsgTime} key={m?._id} />

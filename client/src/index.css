@@ -34,6 +34,10 @@
   background: red !important;
 }
 
+.ant-popover-inner {
+  padding: 5px !important;
+}
+
 .contacts-min-height {
   min-height: calc(100vh - 247px);
 }

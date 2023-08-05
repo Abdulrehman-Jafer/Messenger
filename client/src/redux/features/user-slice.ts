@@ -19,7 +19,7 @@ const initialState: User = {
   email: "",
   image: "",
   blockedContacts: [""],
-  lastLogin: 0,
+  lastLogin: 100,
   userToken: "",
   socketId: "",
 };
@@ -40,9 +40,17 @@ const userSlice = createSlice({
     setUserSocketId: function (state, action: PayloadAction<string>) {
       return { ...state, socketId: action.payload };
     },
+    UninitilizeUser: function () {
+      return initialState;
+    },
   },
 });
 
-export const { initializeUser, uninitializeUser, updateUser, setUserSocketId } =
-  userSlice.actions;
+export const {
+  initializeUser,
+  uninitializeUser,
+  updateUser,
+  setUserSocketId,
+  UninitilizeUser,
+} = userSlice.actions;
 export default userSlice.reducer;

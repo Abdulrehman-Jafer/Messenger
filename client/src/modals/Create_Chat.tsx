@@ -32,7 +32,13 @@ const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, se
 
 
     const handleOk = async () => {
+        console.log({ fields, USERID: User._id })
+        if (fields.isNameOrId == "contact_id") {
+            await createContact({ between: [User._id, fields.contact_id] })
+            return;
+        }
         await createContact({ between: [User._id, fields.contact._id] })
+        return;
     };
 
     const handleCancel = () => {
@@ -54,7 +60,7 @@ const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, se
                             <Input name="contact_name" type="text" size="lg" label="Name" required value={fields.contact_name} onChange={(e) => onChangeHandler(e, setFields)} />
                             <div className='mt-[1rem]'>
                                 <h1 className='text-center font-bold'>Filtered Contacts</h1>
-                                {contacts.filter((c) => c.saved_as.startsWith(fields.contact_name)).splice(0, 5).map((c) => {
+                                {contacts.filter((c) => c.saved_as.toLocaleLowerCase().startsWith(fields.contact_name.toLocaleLowerCase())).splice(0, 5).map((c) => {
                                     return <p key={c._id} onClick={() => setFields(prev => ({ ...prev, contact_name: c.saved_as, contact: c.contact }))} className='hover:bg-pink-red p-[1rem] border-b-2'>{c.saved_as}</p>
                                 })}
                             </div>

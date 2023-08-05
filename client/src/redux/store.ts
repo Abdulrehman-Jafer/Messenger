@@ -5,12 +5,14 @@ import { api } from "./service/api";
 import userReducer from "./features/user-slice";
 import contactReducer from "./features/contact-slice";
 import chatReducer from "./features/chat-slice";
+import messageReducer from "./features/messages-slice";
 
 export const store = configureStore({
   reducer: {
     userReducer,
     chatReducer,
     contactReducer,
+    messageReducer,
     [api.reducerPath]: api.reducer,
   },
   middleware: (getDefaultMiddleware) =>

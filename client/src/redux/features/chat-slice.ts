@@ -1,5 +1,6 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { User } from "./user-slice";
+import { toast } from "react-hot-toast";
 
 interface Contact {
   _id: string;
@@ -27,7 +28,7 @@ export interface ChatSpace {
     contact: Contact;
     isSaved: boolean;
   };
-  messages: Message[];
+  lastMessage: Message;
   _id: string;
 }
 
@@ -40,24 +41,15 @@ const slice = createSlice({
     initializeChatSpace: function (_, action: PayloadAction) {
       return action.payload;
     },
-    addMessage: function (state, action: PayloadAction<any>) {
-      const chatspaceIndex = state.findIndex(
-        (c) => c._id == action.payload.chatspace_id
-      );
-      state[chatspaceIndex].messages.push(action.payload.newMessage);
-      return state;
-    },
-    updateMessageStatus: function (state, action: PayloadAction<any>) {
+
+    updateLastMessage: function (state, action: PayloadAction<any>) {
       const chatSpaceIndex = state.findIndex(
         (c) => c._id == action.payload.chatspace_id
       );
-      const messageToBeReplace = state[chatSpaceIndex].messages.findIndex(
-        (m) => m._id == action.payload.prevId
-      );
-      state[chatSpaceIndex].messages[messageToBeReplace] =
-        action.payload.savedMessage;
+      state[chatSpaceIndex].lastMessage = action.payload.lastMessage;
       return state;
     },
+
     updateUserOnlineStatusInChatspace: function (
       state,
       action: PayloadAction<any>
@@ -66,21 +58,50 @@ const slice = createSlice({
       const chat_space_related_to_user = state.findIndex(
         (c) => c.receiver.connected_to._id == onlineUser_id
       );
-      if (chat_space_related_to_user !== -1) {
-        state[chat_space_related_to_user].receiver.connected_to.socketId =
-          action.payload.socketId;
-        return state;
-      } else {
-        return state;
-      }
+      console.log({ chat_space_related_to_user });
+      if (chat_space_related_to_user == -1) return state;
+      state[chat_space_related_to_user].receiver.connected_to.socketId =
+        action.payload.socketId;
+      state[chat_space_related_to_user].receiver.connected_to.lastLogin = 0;
+      toast(
+        `${
+          state[chat_space_related_to_user].receiver.isSaved
+            ? state[chat_space_related_to_user].receiver.contact.saved_as
+            : state[chat_space_related_to_user].receiver.connected_to._id
+        } is Online `
+      );
+      return state;
+    },
+    updateUserOfflineStatusInChatspace: function (
+      state,
+      action: PayloadAction<string>
+    ) {
+      const socketId = action.payload;
+      const chat_space_related_to_user = state.findIndex(
+        (c) => c.receiver.connected_to.socketId == socketId
+      );
+      console.log({ OFFLINE: "DISPATCHING", chat_space_related_to_user });
+      if (chat_space_related_to_user == -1) return state;
+      state[chat_space_related_to_user].receiver.connected_to.socketId =
+        action.payload;
+      state[chat_space_related_to_user].receiver.connected_to.lastLogin =
+        Date.now();
+      toast(
+        `${
+          state[chat_space_related_to_user].receiver.isSaved
+            ? state[chat_space_related_to_user].receiver.contact.saved_as
+            : state[chat_space_related_to_user].receiver.connected_to._id
+        } is Offline`
+      );
+      return state;
     },
   },
 });
 
 export const {
   initializeChatSpace,
-  addMessage,
-  updateMessageStatus,
+  updateLastMessage,
   updateUserOnlineStatusInChatspace,
+  updateUserOfflineStatusInChatspace,
 } = slice.actions;
 export default slice.reducer;

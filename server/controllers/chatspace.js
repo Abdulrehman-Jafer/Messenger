@@ -1,12 +1,13 @@
 import Chatspace from "../models/chatspace.js";
 import Contact from "../models/contact.js";
+import Message from "../models/message.js";
 
 export const getUserChatSpace = async (req,res,next) => {
     const { user_id } = req.params
     try {
         const chatspaces = await Chatspace.find({
             between: {$in: [user_id]}
-        }).populate({path:"between",model:"User"}).populate({path:"messages",model:"Message",populate:{path:"sender",model:"User"}}).exec()
+        }).populate({path:"between",model:"User"}).populate({path:"lastMessage",model:"Message",populate:{path:"sender",model:"User"}}).sort({updatedAt: -1}).exec()
 
         const userContacts = await Contact.find({ saved_by : user_id}) 
 
@@ -18,7 +19,7 @@ const modifiedChatSpaces = chatspaces.map(c => {
     const receiver = { connected_to, contact: savedContact, isSaved: savedContact ? true : false };
     const sender = c.between.find(c => c._id.equals(user_id));
     return {
-        sender,receiver: receiver,messages: c.messages,_id: c._id
+        sender,receiver: receiver,lastMessage: c.lastMessage,_id: c._id
     }
 })
 
@@ -39,7 +40,7 @@ export const createChatSpace = async (req,res,next) => {
     try {
         const doesExist = await Chatspace.findOne({
             between : {$all: between} // Look where all the ids of between matches inside a chat space
-        }).populate("between","messages").exec()
+        }).populate("between").exec()
         if(doesExist){
            return res.status(200).json({
                 responseCode: 200,
@@ -51,7 +52,6 @@ export const createChatSpace = async (req,res,next) => {
         }
         const newChatspace = new Chatspace({
             between,
-            messsages: []
         })
         const savedChatSpace = await newChatspace.save()
         return res.status(201).json({
@@ -66,22 +66,39 @@ export const createChatSpace = async (req,res,next) => {
     }
 }
 
-// export const getChatSpace = async (req,res,next) => {
-//     const {chatspace_id} = req.params;
-//     try {
-//         const chatspace = await Chatspace.findOne({_id : chatspace_id}).
-//         populate({path:"between",model:"User"}).populate({path:"messages",model:"Message"})
-//         const connected_to = c.between.find(otherUser => !otherUser._id.equals(user_id))
-//         res.status(200).json({
-//             responseCode: 200,
-//             responseMessage: "Fetched chatSpace successfully",
-//             result: {
-//                 chatspace
-//             }
-//         })
-//     } catch (error) {
-//         error.text = "Error In getting Chatspace"
-//         next(error)
-//     }
-    
-// }
+export const getChatSpaceMessages = async (req,res,next) => {
+    const {chatspace_id,skip} = req.params;
+    try {
+        const messages = await Message.find({belongsTo : chatspace_id}).skip(skip).limit(20).populate({path:"sender",model:"User"}).populate({path:"receiver",model:"Message"})
+        res.status(200).json({
+            responseCode: 200,
+            responseMessage: "Fetched chatSpace successfully",
+            result: {
+                messages
+            }
+        })
+    } catch (error) {
+        error.text = "Error In getting Chatspace"
+        next(error)
+    }    
+}
+
+export const getAllChatspaceMessages = async (req,res,next) => {
+    const {user_id,skip} = req.params;
+    const chatspaces = await Chatspace.find({between:{$in:[user_id]}})
+    const allChatspaceMessages = []
+    for(let i=0; i<chatspaces.length; i++){
+        const messages = await Message.find({belongsTo : chatspaces[i]}).skip(skip || 0).limit(20).populate({path:"sender",model:"User"}).populate({path:"receiver",model:"User"})
+        allChatspaceMessages.push({
+            chatspace_id: chatspaces[i]._id,
+            messages:messages
+        })
+    }
+    return res.status(200).json({
+            responseCode: 200,
+            responseMessage: "Fetched chatSpace successfully",
+            result: {
+                allChatspaceMessages
+            }
+    })
+}

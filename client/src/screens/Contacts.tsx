@@ -32,6 +32,9 @@ export default function Contacts() {
         <>
             <section className="flex flex-col gap-2">
                 <div className="sticky top-0 z-10 backdrop-blur-3xl">
+                    <h3 className="text-pink-red text-2xl font-semibold p-2">
+                        Contacts
+                    </h3>
                     <div className="flex justify-between p-[1rem] items-center">
                         <p>Add new Contact</p>
                         <i className=" text-pink-red text-2xl bg-blue-gray-100 hover:bg-blue-gray-200 rounded-full p-2 cursor-pointer" onClick={add_new_Contact}>

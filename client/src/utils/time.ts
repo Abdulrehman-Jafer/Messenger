@@ -1,4 +1,5 @@
 export function getTimeWithAMPMFromDate(dateString: string) {
+  if (!dateString) return "";
   const dateObj = new Date(dateString);
   const hours = dateObj.getHours();
   const minutes = dateObj.getMinutes().toString().padStart(2, "0");

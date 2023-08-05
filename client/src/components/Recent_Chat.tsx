@@ -1,11 +1,12 @@
 import { useNavigate } from "react-router-dom"
-
+import { GoDotFill } from "react-icons/go"
 type Recent_Chat_Props = {
     name: string,
     last_message: string,
     active_status: string,
     user_image: string,
-    chatspace_id: string
+    chatspace_id: string,
+    lastLogin: number
 }
 
 export default function Recent_Chat(props: Recent_Chat_Props) {
@@ -14,8 +15,13 @@ export default function Recent_Chat(props: Recent_Chat_Props) {
     return (
         <main>
             <article className="flex justify-between items-center gap-4 p-[1rem] hover:bg-pink-red cursor-pointer" onClick={() => navigate(`/chats/${props.chatspace_id}`)}>
-                <section>
+                <section className="relative">
                     <img src={image_src} alt="contact_image" className="h-10 w-10 rounded-full" />
+                    {props.lastLogin == 0 && (
+                        <i className="text-pink-red absolute right-[0rem] bottom-[0rem] backdrop-blur-sm rounded-full">
+                            <GoDotFill />
+                        </i>
+                    )}
                 </section>
                 <section className="flex flex-col flex-1">
                     <div className="flex items-center justify-between">

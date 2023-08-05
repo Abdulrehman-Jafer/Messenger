@@ -12,9 +12,7 @@ import chatSpaceRoutes from "./routes/chatspace.js"
 import messageRoutes from "./routes/message.js"
 import http from "http"
 import {Server} from "socket.io"
-import axios from "axios";
 import User from "./models/user.js";
-import { Types } from "mongoose";
 import Message from "./models/message.js";
 import Chatspace from "./models/chatspace.js";
 
@@ -55,16 +53,10 @@ const io  = new Server(server,{
 })
 
 io.on("connection",(socket)=>{
-    console.log(`${socket.id} connected`)
-    socket.on("disconnect",async ()=>{
-        const user = await User.findOneAndUpdate({socketId: socket.id},{socketId: ""},{new: true})
-        console.log(`${user?.name || socket.id} disconnected`)
-    })
-
     socket.on("set-socketId",async (user_data)=>{
-       const user = await User.findOneAndUpdate({_id: user_data._id},{socketId: socket.id,lastLogin: 0 },{new: true})
-       // BroadCast this User Got Online and Sender this user_data with the
-       socket.broadcast.emit("user-online",user)
+        if(!user_data._id) return null;
+        const user = await User.findOneAndUpdate({_id: user_data._id},{socketId: socket.id,lastLogin: 0 },{new: true})
+        socket.broadcast.emit("user-online",user)
     })
     socket.on("send-message",async (data)=>{
         const message = new Message({
@@ -72,24 +64,25 @@ io.on("connection",(socket)=>{
             content: data.content,
             sender: data.sender._id,
             receiver: data.receiver,
+            createdAt:data.createdAt,
             status: 0,
             deletedFor: []
         })
         const savetheMessage = message.save()
-        const updatetheChatspace = Chatspace.findOneAndUpdate(
-            {_id: message.belongsTo},
-            {$push: {messages: message}},
-            {new: true})
-        console.log({socketIdOfSender: data.sender.socketId,receiver: data.receiver.socketId})
+        const updatetheLastMessage= Chatspace.findOneAndUpdate({_id: message.belongsTo},{lastMessage: message._id},{new: true})
+        await savetheMessage;
+        await updatetheLastMessage;
+        const modifiedMessage = {...message._doc,sender: data.sender}
+        socket.to(socket.id).emit("message-saved",{prevId: data._id, message:modifiedMessage})
+        console.log({receiver: data.receiver.socketId})
         if(data.receiver.socketId){
-            socket.to(data.receiver.socketId).emit("receive-message",{message,sender:data.sender})
+            socket.to(data.receiver.socketId).emit("receive-message",{message:modifiedMessage,sender:data.sender,})
         }
-        socket.to(data.sender.socketId).emit("message-saved",{prevId: data._id, message})
-        // Do something with the received data, e.g., broadcasting it to all connected clients:
-        // Add message into the chatspace
-        // socket.broadcast(data)
-        await savetheMessage
-        await updatetheChatspace
+    })
+    
+    socket.on("disconnect",async ()=>{
+        socket.broadcast.emit("user-offline",socket.id)
+        await User.findOneAndUpdate({socketId: socket.id},{socketId: "",lastLogin: Date.now()},{new: true})
     })
 })
 
