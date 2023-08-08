@@ -12,6 +12,7 @@ import Contact from "../components/Contact"
 import { AiOutlinePlus } from "react-icons/ai"
 import Add_Contact from "../modals/Add_Contact"
 import { useState } from "react"
+import Navbar from "../components/Navbar"
 export default function Contacts() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const User = useTypedSelector((selector) => selector.userReducer)
@@ -52,11 +53,7 @@ export default function Contacts() {
                         return <Contact contact={c.contact} saved_as={c.saved_as} key={c._id} _id={c._id} />
                     })}
                 </div>
-                <div className="flex justify-between bg-pink-red p-[1rem] sticky bottom-0">
-                    <i className="text-2xl font-extrabold text-more-grayish  " onClick={() => navigate("/chats")}> <BsChatSquareDots /> </i>
-                    <i className="text-2xl font-extrabold text-white  " onClick={() => navigate("/contacts")}> <FiUsers /> </i>
-                    <i className="text-2xl font-extrabold text-more-grayish "> <CiSettings /> </i>
-                </div>
+                <Navbar />
             </section>
             <Add_Contact isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} user_id={User._id} />
         </>

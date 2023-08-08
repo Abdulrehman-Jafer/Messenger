@@ -78,6 +78,7 @@ export const api = createApi({
         };
       },
       providesTags: ["Chats"],
+      keepUnusedDataFor: 0.001,
     }),
     createChat: builder.mutation<any, any>({
       query: (requsetBody) => {
@@ -98,6 +99,7 @@ export const api = createApi({
           },
         };
       },
+      keepUnusedDataFor: 0.001,
     }),
     // getSpecificChat: builder.query<any, any>({
     //   query: ({ chatspace_id, authorization }) => {

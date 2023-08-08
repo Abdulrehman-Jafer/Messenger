@@ -32,13 +32,27 @@ export const sendMessage = async (req,res,next) => {
             deletedFor: []
         })
         const sentMessage = await message.save()
-        chatspace.messages.push(sentMessage._id)
-        await chatspace.save() 
         return res.status(201).json({
             responseCode: 201,
             responseText: "Message sent successfully",
             result : {
                 sentMessage
+            }
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const deleteForMe = async (req,res,next) => {
+    try {
+        const {message_id,user_id} = req.body;
+        const deletedMessage = await Message.findOneAndUpdate({_id: message_id},{deleteFor:{$push:user_id}})
+        return res.status(200).json({
+            responseCode: 200,
+            responseText: "Message deleted successfully",
+            result: {
+                deletedMessage
             }
         })
     } catch (error) {

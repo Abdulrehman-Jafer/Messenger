@@ -11,13 +11,16 @@ import { getSessionStorage } from "./utils/sessionSorage"
 import { useNavigate } from "react-router-dom"
 // import { useValidateQuery } from "./redux/service/api"
 import { useTypedSelector, useAppDispatch } from "./redux/store"
-import { User, initializeUser, setUserSocketId } from "./redux/features/user-slice"
+import { User, initializeUser } from "./redux/features/user-slice"
 // import PageNotFound from "./screens/404"
 import Contacts from "./screens/Contacts"
 import Contact_details from "./screens/Contact_details"
 import socket from "./socket-io/socket"
-import { updateLastMessage, updateUserOfflineStatusInChatspace, updateUserOnlineStatusInChatspace } from "./redux/features/chat-slice"
+import { updateUserOfflineStatusInChatspace, updateUserOnlineStatusInChatspace } from "./redux/features/chat-slice"
 import { addMessagesInChatspace, updateChatspaceMessage } from "./redux/features/messages-slice"
+import Settings from "./screens/Settings"
+import notificatioSound from "./assets/whatssapp_web.mp3";
+
 
 
 
@@ -41,21 +44,23 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-
     function user_online_Handler(data: any) {
       dispatch(updateUserOnlineStatusInChatspace({ onlineUser_id: data._id, socketId: data.socketId }))
     }
 
+    function playNotificationSound() {
+      const audio = new Audio(notificatioSound);
+      audio.play();
+    }
+
     function receiveMessageHandler(data: any) {
-      console.log("MessageReceived", data)
       const message = data.message;
-      const chatspace_id = message.belongsTo
+      const chatspace_id = message.belongsTo;
       dispatch(addMessagesInChatspace({ chatspace_id, newMessage: message }))
-      dispatch(updateLastMessage({ chatspace_id, lastMessage: message }))
+      playNotificationSound()
     }
 
     function saveMessageHandler(data: any) {
-      console.log("MessageSaved", data)
       const chatspace_id = data.message.belongsTo
       dispatch(updateChatspaceMessage({ chatspace_id, messageId: data.prevId, savedMessage: data.savedMessage }))
     }
@@ -64,7 +69,6 @@ export default function App() {
       console.log({ data })
       dispatch(updateUserOfflineStatusInChatspace(data))
     }
-
     socket.on("user-online", user_online_Handler)
     socket.on("receive-message", receiveMessageHandler)
     socket.on("message-saved", saveMessageHandler)
@@ -92,6 +96,7 @@ export default function App() {
             <Route path="/chats/:chatspace_id" element={<Chat_space />} />
             <Route path="/contacts" element={<Contacts />} />
             <Route path="/contacts/:contact_id" element={<Contact_details />} />
+            <Route path="/settings" element={<Settings />} />
           </>
         )}
         {/* <Route path="*" element={<PageNotFound />} /> */}

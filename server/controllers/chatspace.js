@@ -7,7 +7,7 @@ export const getUserChatSpace = async (req,res,next) => {
     try {
         const chatspaces = await Chatspace.find({
             between: {$in: [user_id]}
-        }).populate({path:"between",model:"User"}).populate({path:"lastMessage",model:"Message",populate:{path:"sender",model:"User"}}).sort({updatedAt: -1}).exec()
+        }).populate({path:"between",model:"User"}).sort({updatedAt: -1}).exec()
 
         const userContacts = await Contact.find({ saved_by : user_id}) 
 
@@ -19,7 +19,7 @@ const modifiedChatSpaces = chatspaces.map(c => {
     const receiver = { connected_to, contact: savedContact, isSaved: savedContact ? true : false };
     const sender = c.between.find(c => c._id.equals(user_id));
     return {
-        sender,receiver: receiver,lastMessage: c.lastMessage,_id: c._id
+        sender,receiver: receiver,_id: c._id
     }
 })
 
@@ -66,29 +66,17 @@ export const createChatSpace = async (req,res,next) => {
     }
 }
 
-export const getChatSpaceMessages = async (req,res,next) => {
-    const {chatspace_id,skip} = req.params;
-    try {
-        const messages = await Message.find({belongsTo : chatspace_id}).skip(skip).limit(20).populate({path:"sender",model:"User"}).populate({path:"receiver",model:"Message"})
-        res.status(200).json({
-            responseCode: 200,
-            responseMessage: "Fetched chatSpace successfully",
-            result: {
-                messages
-            }
-        })
-    } catch (error) {
-        error.text = "Error In getting Chatspace"
-        next(error)
-    }    
-}
-
 export const getAllChatspaceMessages = async (req,res,next) => {
     const {user_id,skip} = req.params;
     const chatspaces = await Chatspace.find({between:{$in:[user_id]}})
     const allChatspaceMessages = []
     for(let i=0; i<chatspaces.length; i++){
-        const messages = await Message.find({belongsTo : chatspaces[i]}).skip(skip || 0).limit(20).populate({path:"sender",model:"User"}).populate({path:"receiver",model:"User"})
+        const totalMessages = await Message.countDocuments({belongsTo : chatspaces[i]})
+        const skipCount = Math.max(totalMessages - 20, 0);
+        const messages = await Message.find({belongsTo : chatspaces[i],deletedFor: {$nin: [user_id] },deletedForEveryone: false}).
+            skip(skipCount).limit(20).populate({path:"sender",model:"User"}).
+            populate({path:"receiver",model:"User"})
+
         allChatspaceMessages.push({
             chatspace_id: chatspaces[i]._id,
             messages:messages

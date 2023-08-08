@@ -38,14 +38,17 @@
   padding: 5px !important;
 }
 
+.chatList-min-height {
+  min-height: calc(100vh - 277px);
+}
 .contacts-min-height {
   min-height: calc(100vh - 247px);
 }
-.chatList-min-height {
-  min-height: calc(100vh - 271px);
-}
 .chatspace-min-height {
   min-height: calc(100vh - 130px);
+}
+.setting-min-height {
+  min-height: calc(100vh - 256px);
 }
 
 .maxCharacter {
@@ -53,4 +56,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.absoluteCenter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.myBlur {
+  filter: blur(10px);
 }

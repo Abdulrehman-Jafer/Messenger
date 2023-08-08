@@ -3,7 +3,8 @@ import { Schema,model,Types } from "mongoose";
 const schema = new Schema({
         belongsTo: {
             type: Types.ObjectId,
-            ref: "ChatSpace"
+            ref: "ChatSpace",
+            required: true
         },
         content: 
         {
@@ -22,13 +23,21 @@ const schema = new Schema({
             ref:"User",
             required: true
         },
-        status: Number,
-        deletedFor:[
-            {
-                type:Types.ObjectId,
-                ref:"User"
-            }
-        ],
+        status: 
+        {
+            type: Number,
+            default: 0
+        },
+        deleteFor: [
+        { 
+            type: Types.ObjectId,
+            ref: "User"
+        }],
+        deletedForEveryone: 
+        {
+            type: Boolean,
+            default: false
+        }
 },{timestamps:true})
 
 export default new model("Message",schema)

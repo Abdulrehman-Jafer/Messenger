@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom"
 import { GoDotFill } from "react-icons/go"
+import { fixImageUrl } from "../utils/misc"
 type Recent_Chat_Props = {
     name: string,
     last_message: string,
@@ -11,7 +12,7 @@ type Recent_Chat_Props = {
 
 export default function Recent_Chat(props: Recent_Chat_Props) {
     const navigate = useNavigate()
-    const image_src = props.user_image?.startsWith("storage") ? `http://localhost:3000/${props.user_image}` : props.user_image
+    const image_src = fixImageUrl(props.user_image)
     return (
         <main>
             <article className="flex justify-between items-center gap-4 p-[1rem] hover:bg-pink-red cursor-pointer" onClick={() => navigate(`/chats/${props.chatspace_id}`)}>

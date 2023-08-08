@@ -1,37 +1,34 @@
-import { BsSearch, BsChatSquareDots } from "react-icons/bs"
+import { BsSearch } from "react-icons/bs"
 import { AiOutlinePlus } from "react-icons/ai"
-import { CiSettings } from "react-icons/ci"
-import { FiUsers } from "react-icons/fi"
 import Recent_Chat from "../components/Recent_Chat"
 import { useState } from "react"
 import { useGetAllChatSpaceMessagesQuery, useGetChatsQuery, useGetContactsQuery } from "../redux/service/api"
 import { useTypedSelector, useAppDispatch } from "../redux/store"
 import { useEffect } from "react"
-import { useNavigate } from "react-router-dom"
 import { setGlobalContacts } from "../redux/features/contact-slice"
 import { toast } from "react-hot-toast"
 import RecentContact from "../components/RecentContact"
 import Create_Chat from "../modals/Create_Chat"
-import { updateLastMessage, updateUserOfflineStatusInChatspace, updateUserOnlineStatusInChatspace } from "../redux/features/chat-slice"
 import { initializeChatSpace } from "../redux/features/chat-slice"
 import socket from "../socket-io/socket"
 import { setUserSocketId } from "../redux/features/user-slice"
 // import LogOut from "../components/LogOut"
 import { getTimeWithAMPMFromDate } from "../utils/time"
 import { BsThreeDotsVertical } from 'react-icons/bs';
-import { addMessagesInChatspace, updateChatspaceMessage, setAllChatSpaceMessage } from "../redux/features/messages-slice"
+import { setAllChatSpaceMessage } from "../redux/features/messages-slice"
+import Navbar from "../components/Navbar"
 
 
 export default function Home() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     // const [isLogOutModalOpen, setIsLogOutModalOpen] = useState(false)
-    const navigate = useNavigate()
     const User = useTypedSelector((selector) => selector.userReducer)
     const { isError, isFetching, isSuccess, isLoading, data } = useGetContactsQuery({ user_id: User._id, Authorization: User.userToken })
     const { isError: chatError, isLoading: chatLoading, data: chatData, isSuccess: chatSuccess } = useGetChatsQuery({ user_id: User._id, Authorization: User.userToken })
     const { isError: messageError, isLoading: messageLoading, data: messageData, isSuccess: messageSuccess } = useGetAllChatSpaceMessagesQuery({ user_id: User._id })
     const chats = useTypedSelector(selector => selector.chatReducer)
     const contacts = useTypedSelector(selector => selector.contactReducer)
+    const chatspaceMessages = useTypedSelector(selector => selector.messageReducer)
     const dispatch = useAppDispatch()
     const [chatFilter, setChatFilter] = useState("")
 
@@ -50,7 +47,6 @@ export default function Home() {
         let toastId = "";
         if (chatSuccess && !chatLoading) {
             toastId = toast.success("Loaded Chat Successfully")
-            console.log({ chatData })
             dispatch(initializeChatSpace(chatData.result.chatspaces))
         }
         if (!chatLoading && chatError) {
@@ -80,8 +76,11 @@ export default function Home() {
     }, [messageLoading])
 
     useEffect(() => {
-        socket.emit("set-socketId", User)
-        dispatch(setUserSocketId(socket.id))
+        function socketIdHandler() {
+            dispatch(setUserSocketId(socket.id))
+        }
+
+        socket.emit("set-socketId", User, socketIdHandler)
     }, [])
 
 
@@ -134,12 +133,14 @@ export default function Home() {
                     <article className="flex flex-col chatList-min-height">
                         {chatLoading ?
                             <p>Loading Chats</p> : filteredChat.length > 0 ? filteredChat.map(c => {
-                                // console.log({ c })
+                                const indexOfCurrent = chatspaceMessages.findIndex(m => m.chatspace_id == c._id)
+                                const currentChat = chatspaceMessages[indexOfCurrent]
+                                const lastMessage = currentChat?.messages[currentChat.messages.length - 1]
                                 return (
                                     <Recent_Chat
                                         lastLogin={c.receiver.connected_to.lastLogin}
-                                        active_status={c.lastMessage && getTimeWithAMPMFromDate(c?.lastMessage.createdAt) || ""}
-                                        last_message={c.lastMessage && c?.lastMessage?.content || "No recent Message"}
+                                        active_status={getTimeWithAMPMFromDate(lastMessage?.createdAt)}
+                                        last_message={lastMessage?.content || "No recent Message"}
                                         name={c.receiver.isSaved ? c.receiver.contact.saved_as : c.receiver.connected_to._id}
                                         user_image={c.receiver.connected_to.image}
                                         chatspace_id={c._id}
@@ -161,11 +162,7 @@ export default function Home() {
                         }
                     </article>
                 </div>
-                <article className="flex justify-between bg-pink-red p-[1rem] sticky bottom-0">
-                    <i className="text-2xl font-extrabold text-white " onClick={() => navigate("/chats")}> <BsChatSquareDots /> </i>
-                    <i className="text-2xl font-extrabold text-more-grayish " onClick={() => navigate("/contacts")}> <FiUsers /> </i>
-                    <i className="text-2xl font-extrabold text-more-grayish "> <CiSettings /> </i>
-                </article>
+                <Navbar />
             </main>
             <Create_Chat isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
         </>

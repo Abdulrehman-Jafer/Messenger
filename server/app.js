@@ -45,6 +45,9 @@ app.use((error,req,res,next)=>{
     return res.status(error.statusCode).json(error)
 })
 const server = http.createServer(app)
+
+
+
 const io  = new Server(server,{
     cors: {
         origin:"*",
@@ -58,6 +61,7 @@ io.on("connection",(socket)=>{
         const user = await User.findOneAndUpdate({_id: user_data._id},{socketId: socket.id,lastLogin: 0 },{new: true})
         socket.broadcast.emit("user-online",user)
     })
+
     socket.on("send-message",async (data)=>{
         const message = new Message({
             belongsTo: data.belongsTo,
@@ -66,15 +70,13 @@ io.on("connection",(socket)=>{
             receiver: data.receiver,
             createdAt:data.createdAt,
             status: 0,
-            deletedFor: []
+            deletedFor: [],
+            deletedForEveryone:false
         })
-        const savetheMessage = message.save()
-        const updatetheLastMessage= Chatspace.findOneAndUpdate({_id: message.belongsTo},{lastMessage: message._id},{new: true})
-        await savetheMessage;
-        await updatetheLastMessage;
+
+        await message.save()
         const modifiedMessage = {...message._doc,sender: data.sender}
         socket.to(socket.id).emit("message-saved",{prevId: data._id, message:modifiedMessage})
-        console.log({receiver: data.receiver.socketId})
         if(data.receiver.socketId){
             socket.to(data.receiver.socketId).emit("receive-message",{message:modifiedMessage,sender:data.sender,})
         }

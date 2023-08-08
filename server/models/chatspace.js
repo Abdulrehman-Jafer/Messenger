@@ -7,11 +7,7 @@ const schema = new Schema({
             ref:"User"
         }
     ],
-    lastMessage: {
-        type: Types.ObjectId,
-        ref:"Message"
-}
-
+ // Will use as room will add isGroup boolean maybe
 },{timestamps:true})
 
 const Chatspace = new model("Chatspace",schema)

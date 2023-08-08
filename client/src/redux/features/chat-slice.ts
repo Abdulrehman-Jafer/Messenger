@@ -17,6 +17,7 @@ export interface Message {
   receiver: string;
   status: number;
   deletedFor: string[];
+  deletedForEveyone: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -28,7 +29,6 @@ export interface ChatSpace {
     contact: Contact;
     isSaved: boolean;
   };
-  lastMessage: Message;
   _id: string;
 }
 
@@ -42,14 +42,6 @@ const slice = createSlice({
       return action.payload;
     },
 
-    updateLastMessage: function (state, action: PayloadAction<any>) {
-      const chatSpaceIndex = state.findIndex(
-        (c) => c._id == action.payload.chatspace_id
-      );
-      state[chatSpaceIndex].lastMessage = action.payload.lastMessage;
-      return state;
-    },
-
     updateUserOnlineStatusInChatspace: function (
       state,
       action: PayloadAction<any>
@@ -58,7 +50,6 @@ const slice = createSlice({
       const chat_space_related_to_user = state.findIndex(
         (c) => c.receiver.connected_to._id == onlineUser_id
       );
-      console.log({ chat_space_related_to_user });
       if (chat_space_related_to_user == -1) return state;
       state[chat_space_related_to_user].receiver.connected_to.socketId =
         action.payload.socketId;
@@ -72,6 +63,7 @@ const slice = createSlice({
       );
       return state;
     },
+
     updateUserOfflineStatusInChatspace: function (
       state,
       action: PayloadAction<string>
@@ -100,7 +92,6 @@ const slice = createSlice({
 
 export const {
   initializeChatSpace,
-  updateLastMessage,
   updateUserOnlineStatusInChatspace,
   updateUserOfflineStatusInChatspace,
 } = slice.actions;

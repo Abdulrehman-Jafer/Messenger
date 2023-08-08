@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom"
 import { User } from "../redux/features/user-slice"
+import { fixImageUrl } from "../utils/misc"
 type contactProps = {
     _id: string,
     contact: Partial<User>,
@@ -7,9 +8,8 @@ type contactProps = {
 }
 
 export default function Contact({ contact, saved_as, _id }: contactProps) {
-    const image_src = (contact.image)!.startsWith("storage") ? `http://localhost:3000/${(contact.image)!}` : contact.image
+    const image_src = fixImageUrl(contact.image!)
     const navigate = useNavigate()
-
 
     return (
         <section onClick={() => navigate(`/contacts/${_id}`)} className="cursor-pointer hover:bg-pink-red hover:text-white">
