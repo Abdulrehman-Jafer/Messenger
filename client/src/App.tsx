@@ -17,7 +17,7 @@ import Contacts from "./screens/Contacts"
 import Contact_details from "./screens/Contact_details"
 import socket from "./socket-io/socket"
 import { updateUserOfflineStatusInChatspace, updateUserOnlineStatusInChatspace } from "./redux/features/chat-slice"
-import { addMessagesInChatspace, updateChatspaceMessage } from "./redux/features/messages-slice"
+import { addMessagesInChatspace, deleteMessage, updateChatspaceMessage } from "./redux/features/messages-slice"
 import Settings from "./screens/Settings"
 import notificatioSound from "./assets/whatssapp_web.mp3";
 
@@ -61,22 +61,27 @@ export default function App() {
     }
 
     function saveMessageHandler(data: any) {
-      const chatspace_id = data.message.belongsTo
-      dispatch(updateChatspaceMessage({ chatspace_id, messageId: data.prevId, savedMessage: data.savedMessage }))
+      console.log({ data })
+      dispatch(updateChatspaceMessage({ chatspace_id: data.chatspace_id, tempId: data.tempId, mongo_message_id: data.mongo_message_id }))
+    }
+
+    function deleteMessageForEveryoneHandler(data: any) {
+      console.log({ Dispatching: "Message deleted for everyone!!" })
+      dispatch(deleteMessage({ message_id: data.message_id, chatspace_id: data.chatspace_id, deletedForEveryone: true }))
     }
 
     function user_offline_Handler(data: any) {
-      console.log({ data })
       dispatch(updateUserOfflineStatusInChatspace(data))
     }
     socket.on("user-online", user_online_Handler)
     socket.on("receive-message", receiveMessageHandler)
     socket.on("message-saved", saveMessageHandler)
     socket.on("user-offline", user_offline_Handler)
+    socket.on("messageDeletedForEveryone", deleteMessageForEveryoneHandler)
     return () => {
       socket.off("user-online", user_online_Handler)
-      socket.off("message-saved", saveMessageHandler)
       socket.off("receive-message", receiveMessageHandler)
+      socket.off("message-saved", saveMessageHandler)
       socket.off("user-offline", user_offline_Handler)
     }
   }, [socket, userData])

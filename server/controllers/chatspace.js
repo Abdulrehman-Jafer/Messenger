@@ -73,7 +73,10 @@ export const getAllChatspaceMessages = async (req,res,next) => {
     for(let i=0; i<chatspaces.length; i++){
         const totalMessages = await Message.countDocuments({belongsTo : chatspaces[i]})
         const skipCount = Math.max(totalMessages - 20, 0);
-        const messages = await Message.find({belongsTo : chatspaces[i],deletedFor: {$nin: [user_id] },deletedForEveryone: false}).
+        const messages = await Message.find({
+            belongsTo : chatspaces[i],
+            deletedFor: {$nin: [user_id] }
+        }).
             skip(skipCount).limit(20).populate({path:"sender",model:"User"}).
             populate({path:"receiver",model:"User"})
 

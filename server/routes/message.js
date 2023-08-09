@@ -1,8 +1,9 @@
 import express from "express";
-import {sendMessage,deleteForMe} from "../controllers/message.js"
+import {sendMessage,deleteForMe,deleteForEveryone} from "../controllers/message.js"
 const router = express.Router();
 
 router.post("/send",sendMessage)
-router.delete("/delete",deleteForMe)
+router.delete("/deleteforme",deleteForMe)
+router.delete("/deleteforeveyone",deleteForEveryone)
 
 export default router;

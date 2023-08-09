@@ -15,6 +15,7 @@ import {Server} from "socket.io"
 import User from "./models/user.js";
 import Message from "./models/message.js";
 import Chatspace from "./models/chatspace.js";
+import axios from "axios";
 
 const app = express()
 dotenv.config();
@@ -69,17 +70,21 @@ io.on("connection",(socket)=>{
             sender: data.sender._id,
             receiver: data.receiver,
             createdAt:data.createdAt,
-            status: 0,
+            status: 1,
             deletedFor: [],
             deletedForEveryone:false
         })
-
+        
         await message.save()
+        socket.emit("message-saved",{chatspace_id:message.belongsTo,tempId: data._id, mongo_message_id: message._id})
         const modifiedMessage = {...message._doc,sender: data.sender}
-        socket.to(socket.id).emit("message-saved",{prevId: data._id, message:modifiedMessage})
         if(data.receiver.socketId){
             socket.to(data.receiver.socketId).emit("receive-message",{message:modifiedMessage,sender:data.sender,})
         }
+    })
+
+    socket.on("deleteMessageForEveryone", (data) => {
+        socket.to(data.receiverSocketId).emit("messageDeletedForEveryone",{chatspace_id: data.chatspace_id,message_id:data.message_id})
     })
     
     socket.on("disconnect",async ()=>{

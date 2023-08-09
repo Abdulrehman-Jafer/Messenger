@@ -2,7 +2,7 @@ import { BsSearch } from "react-icons/bs"
 import { AiOutlinePlus } from "react-icons/ai"
 import Recent_Chat from "../components/Recent_Chat"
 import { useState } from "react"
-import { useGetAllChatSpaceMessagesQuery, useGetChatsQuery, useGetContactsQuery } from "../redux/service/api"
+import { useGetAllChatSpaceMessagesQuery, useGetChatspacesQuery, useGetContactsQuery } from "../redux/service/api"
 import { useTypedSelector, useAppDispatch } from "../redux/store"
 import { useEffect } from "react"
 import { setGlobalContacts } from "../redux/features/contact-slice"
@@ -24,7 +24,7 @@ export default function Home() {
     // const [isLogOutModalOpen, setIsLogOutModalOpen] = useState(false)
     const User = useTypedSelector((selector) => selector.userReducer)
     const { isError, isFetching, isSuccess, isLoading, data } = useGetContactsQuery({ user_id: User._id, Authorization: User.userToken })
-    const { isError: chatError, isLoading: chatLoading, data: chatData, isSuccess: chatSuccess } = useGetChatsQuery({ user_id: User._id, Authorization: User.userToken })
+    const { isError: chatError, isLoading: chatLoading, data: chatData, isSuccess: chatSuccess } = useGetChatspacesQuery({ user_id: User._id, Authorization: User.userToken })
     const { isError: messageError, isLoading: messageLoading, data: messageData, isSuccess: messageSuccess } = useGetAllChatSpaceMessagesQuery({ user_id: User._id })
     const chats = useTypedSelector(selector => selector.chatReducer)
     const contacts = useTypedSelector(selector => selector.contactReducer)
@@ -140,7 +140,7 @@ export default function Home() {
                                     <Recent_Chat
                                         lastLogin={c.receiver.connected_to.lastLogin}
                                         active_status={getTimeWithAMPMFromDate(lastMessage?.createdAt)}
-                                        last_message={lastMessage?.content || "No recent Message"}
+                                        last_message={lastMessage?.deletedForEveryone ? "This message was deleted" : (lastMessage?.content || "No recent Message")}
                                         name={c.receiver.isSaved ? c.receiver.contact.saved_as : c.receiver.connected_to._id}
                                         user_image={c.receiver.connected_to.image}
                                         chatspace_id={c._id}

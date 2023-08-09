@@ -28,7 +28,7 @@ const schema = new Schema({
             type: Number,
             default: 0
         },
-        deleteFor: [
+        deletedFor: [
         { 
             type: Types.ObjectId,
             ref: "User"

@@ -5,7 +5,7 @@ const baseUrl = "http://localhost:3000/";
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl }),
-  tagTypes: ["Contacts", "Chats"],
+  tagTypes: ["Contacts", "Chats", "Messages"],
   endpoints: (builder) => ({
     createUser: builder.mutation<any, any>({
       query(requestBody) {
@@ -68,7 +68,7 @@ export const api = createApi({
       },
       invalidatesTags: ["Contacts", "Chats"],
     }),
-    getChats: builder.query<any, any>({
+    getChatspaces: builder.query<any, any>({
       query: ({ user_id, authorization }) => {
         return {
           url: `/chatspace/${user_id}`, //http://localhost:3000/chatspace/64b421f9e21fede38c9084ee
@@ -78,7 +78,6 @@ export const api = createApi({
         };
       },
       providesTags: ["Chats"],
-      keepUnusedDataFor: 0.001,
     }),
     createChat: builder.mutation<any, any>({
       query: (requsetBody) => {
@@ -90,6 +89,7 @@ export const api = createApi({
       },
       invalidatesTags: ["Chats"],
     }),
+
     getAllChatSpaceMessages: builder.query<any, any>({
       query: ({ user_id }) => {
         return {
@@ -101,16 +101,26 @@ export const api = createApi({
       },
       keepUnusedDataFor: 0.001,
     }),
-    // getSpecificChat: builder.query<any, any>({
-    //   query: ({ chatspace_id, authorization }) => {
-    //     return {
-    //       url: `/chatspace/getchat/${chatspace_id}`,
-    //       headers: {
-    //         authorization,
-    //       },
-    //     };
-    //   },
-    // }),
+
+    deleteForMe: builder.mutation<any, any>({
+      query: (requestBody) => {
+        return {
+          url: "message/deleteforme",
+          method: "DELETE",
+          body: requestBody,
+        };
+      },
+    }),
+
+    deleteForEveyone: builder.mutation<any, any>({
+      query: (requestBody) => {
+        return {
+          url: "message/deleteforeveyone",
+          method: "DELETE",
+          body: requestBody,
+        };
+      },
+    }),
   }),
 });
 
@@ -122,6 +132,8 @@ export const {
   useGetContactsQuery,
   useCreateContactMutation,
   useCreateChatMutation,
-  useGetChatsQuery,
+  useGetChatspacesQuery,
   useGetAllChatSpaceMessagesQuery,
+  useDeleteForMeMutation,
+  useDeleteForEveyoneMutation,
 } = api;

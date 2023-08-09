@@ -17,7 +17,7 @@ export interface Message {
   receiver: string;
   status: number;
   deletedFor: string[];
-  deletedForEveyone: boolean;
+  deletedForEveryone: boolean;
   createdAt: string;
   updatedAt: string;
 }

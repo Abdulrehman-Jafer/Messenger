@@ -27,14 +27,32 @@ const slice = createSlice({
     },
 
     updateChatspaceMessage: function (state, action: PayloadAction<any>) {
-      const { chatspace_id, messageId, message } = action.payload;
+      const { chatspace_id, tempId, mongo_message_id, messageStatus } =
+        action.payload;
       const chatspaceIndex = state.findIndex(
         (c) => c.chatspace_id == chatspace_id
       );
       const messageIndex = state[chatspaceIndex].messages.findIndex(
-        (m) => m._id == messageId
+        (m) => m._id == tempId
       );
-      state[chatspaceIndex].messages[messageIndex] = message;
+      state[chatspaceIndex].messages[messageIndex]._id = mongo_message_id;
+      state[chatspaceIndex].messages[messageIndex].status = 1;
+      return state;
+    },
+
+    deleteMessage: function (state, action: PayloadAction<any>) {
+      const chatspaceIndex = state.findIndex(
+        (s) => s.chatspace_id == action.payload.chatspace_id
+      );
+      const messageIndex = state[chatspaceIndex].messages.findIndex(
+        (m) => m._id == action.payload.message_id
+      );
+      if (action.payload.deletedForEveryone) {
+        state[chatspaceIndex].messages[messageIndex].content = "";
+        state[chatspaceIndex].messages[messageIndex].deletedForEveryone = true;
+        return state;
+      }
+      state[chatspaceIndex].messages.splice(messageIndex, 1);
       return state;
     },
   },
@@ -44,6 +62,7 @@ export const {
   setAllChatSpaceMessage,
   addMessagesInChatspace,
   updateChatspaceMessage,
+  deleteMessage,
 } = slice.actions;
 
 export default slice.reducer;

@@ -72,7 +72,20 @@ export default function Chat_space() {
                             nextMsgSender: messages[i + 1]?.sender,
                             nextMsgTime: getTimeWithAMPMFromDate(nextMessageTime)
                         }
-                        return <Message createdAt={currentMessageTime} content={m?.content} sender={m?.sender} receiver={m?.receiver} status={m?.status} nextMsgSenderId={stylingData?.nextMsgSender?._id} nextMsgTime={stylingData?.nextMsgTime} key={m?._id} />
+                        return (
+                            <Message
+                                createdAt={currentMessageTime}
+                                content={m?.content}
+                                sender={m?.sender}
+                                receiver={m?.receiver}
+                                status={m.status}
+                                nextMsgSenderId={stylingData?.nextMsgSender?._id}
+                                nextMsgTime={stylingData?.nextMsgTime}
+                                _id={m._id}
+                                belongsTo={m.belongsTo}
+                                deletedForEveryone={m.deletedForEveryone}
+                                receiverSocketId={chatspace.receiver.connected_to.socketId}
+                                key={m?._id} />)
                     }) :
                     <h1 className="text-center text-grayish">No Messages to show</h1>
                 }

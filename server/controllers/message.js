@@ -1,6 +1,7 @@
 import Message from "../models/message.js";
 import Chatspace from "../models/chatspace.js";
 import {checkIsProvided,invalidDataResponse} from "../utils/checkIsProvided.js"
+import mongoose from "mongoose";
 
 export const sendMessage = async (req,res,next) => {
     const {sender_id,chatspace_id,content} = req.body;
@@ -45,14 +46,31 @@ export const sendMessage = async (req,res,next) => {
 }
 
 export const deleteForMe = async (req,res,next) => {
+    const {message_id,user_id} = req.body;
     try {
-        const {message_id,user_id} = req.body;
-        const deletedMessage = await Message.findOneAndUpdate({_id: message_id},{deleteFor:{$push:user_id}})
+        const deletedMessage = await Message.findOneAndUpdate({_id: message_id},{$push: {deletedFor: user_id} })
+        console.log({deletedMessage})
+        return res.status(200).json({
+            responseCode: 200,
+            responseText: "Message deleted for you successfully",
+            result: {
+                deletedMessage
+            }
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const deleteForEveryone = async (req,res,next) => {
+    const {message_id} = req.body;
+    try {
+        const deletedForEveryone = await Message.findOneAndUpdate({_id: message_id},{content: "",deletedForEveryone:true},{new: true})
         return res.status(200).json({
             responseCode: 200,
             responseText: "Message deleted successfully",
             result: {
-                deletedMessage
+                deletedForEveryone
             }
         })
     } catch (error) {
