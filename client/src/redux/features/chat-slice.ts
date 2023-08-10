@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast";
 
 interface Contact {
   _id: string;
-  contact: string;
+  contact: Partial<User>;
   saved_as: string;
   saved_by: string;
 }
@@ -42,6 +42,24 @@ const slice = createSlice({
       return action.payload;
     },
 
+    addNewChat: function (state, action: PayloadAction<any>) {
+      state.push(action.payload);
+      console.log({ payload: action.payload });
+      return state;
+    },
+
+    updateContactInfo: function (state, action: PayloadAction<any>) {
+      const { contact } = action.payload;
+      const chatspace_index = state.findIndex((s) => {
+        return s.receiver.connected_to._id == contact._id;
+      });
+
+      state[chatspace_index].receiver.isSaved = true;
+      state[chatspace_index].receiver.contact = action.payload;
+
+      return state;
+    },
+
     updateUserOnlineStatusInChatspace: function (
       state,
       action: PayloadAction<any>
@@ -58,7 +76,8 @@ const slice = createSlice({
         `${
           state[chat_space_related_to_user].receiver.isSaved
             ? state[chat_space_related_to_user].receiver.contact.saved_as
-            : state[chat_space_related_to_user].receiver.connected_to._id
+            : state[chat_space_related_to_user].receiver.connected_to
+                .public_number
         } is Online `
       );
       return state;
@@ -82,7 +101,8 @@ const slice = createSlice({
         `${
           state[chat_space_related_to_user].receiver.isSaved
             ? state[chat_space_related_to_user].receiver.contact.saved_as
-            : state[chat_space_related_to_user].receiver.connected_to._id
+            : state[chat_space_related_to_user].receiver.connected_to
+                .public_number
         } is Offline`
       );
       return state;
@@ -92,7 +112,9 @@ const slice = createSlice({
 
 export const {
   initializeChatSpace,
+  addNewChat,
   updateUserOnlineStatusInChatspace,
   updateUserOfflineStatusInChatspace,
+  updateContactInfo,
 } = slice.actions;
 export default slice.reducer;

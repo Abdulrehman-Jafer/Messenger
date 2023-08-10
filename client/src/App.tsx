@@ -20,6 +20,7 @@ import { updateUserOfflineStatusInChatspace, updateUserOnlineStatusInChatspace }
 import { addMessagesInChatspace, deleteMessage, updateChatspaceMessage } from "./redux/features/messages-slice"
 import Settings from "./screens/Settings"
 import notificatioSound from "./assets/whatssapp_web.mp3";
+import { updateContactOfflineStatus, updateContactOnlineStatus } from "./redux/features/contact-slice"
 
 
 
@@ -44,8 +45,10 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+
     function user_online_Handler(data: any) {
       dispatch(updateUserOnlineStatusInChatspace({ onlineUser_id: data._id, socketId: data.socketId }))
+      dispatch(updateContactOnlineStatus(data))
     }
 
     function playNotificationSound() {
@@ -61,17 +64,16 @@ export default function App() {
     }
 
     function saveMessageHandler(data: any) {
-      console.log({ data })
       dispatch(updateChatspaceMessage({ chatspace_id: data.chatspace_id, tempId: data.tempId, mongo_message_id: data.mongo_message_id }))
     }
 
     function deleteMessageForEveryoneHandler(data: any) {
-      console.log({ Dispatching: "Message deleted for everyone!!" })
       dispatch(deleteMessage({ message_id: data.message_id, chatspace_id: data.chatspace_id, deletedForEveryone: true }))
     }
 
     function user_offline_Handler(data: any) {
       dispatch(updateUserOfflineStatusInChatspace(data))
+      dispatch(updateContactOfflineStatus(data))
     }
     socket.on("user-online", user_online_Handler)
     socket.on("receive-message", receiveMessageHandler)

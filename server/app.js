@@ -14,8 +14,6 @@ import http from "http"
 import {Server} from "socket.io"
 import User from "./models/user.js";
 import Message from "./models/message.js";
-import Chatspace from "./models/chatspace.js";
-import axios from "axios";
 
 const app = express()
 dotenv.config();
@@ -79,6 +77,7 @@ io.on("connection",(socket)=>{
         socket.emit("message-saved",{chatspace_id:message.belongsTo,tempId: data._id, mongo_message_id: message._id})
         const modifiedMessage = {...message._doc,sender: data.sender}
         if(data.receiver.socketId){
+            console.log({receiverSocketId: data.receiver.socketId})
             socket.to(data.receiver.socketId).emit("receive-message",{message:modifiedMessage,sender:data.sender,})
         }
     })

@@ -58,7 +58,7 @@ export default function Chat_space() {
         <main className="flex flex-col">
             <section className="flex p-[1rem] justify-between items-center sticky top-0 z-10 backdrop-blur-3xl">
                 <i className="text-[1.3rem] cursor-pointer" onClick={() => navigate("/chats")}><IoIosArrowBack /></i>
-                <h2 className="text-[1.3rem]">{chatspace?.receiver.isSaved ? chatspace.receiver.contact.saved_as : chatspace?.receiver.connected_to._id}</h2>
+                <h2 className="text-[1.3rem]">{chatspace?.receiver.isSaved ? chatspace.receiver.contact.saved_as : chatspace?.receiver.connected_to.public_number}</h2>
                 <div className="flex-shrink-0">
                     <img src={image_src} alt="contact_image" className="h-10 w-10 rounded-full" />
                 </div>

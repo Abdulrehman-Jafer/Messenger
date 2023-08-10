@@ -49,7 +49,6 @@ export const deleteForMe = async (req,res,next) => {
     const {message_id,user_id} = req.body;
     try {
         const deletedMessage = await Message.findOneAndUpdate({_id: message_id},{$push: {deletedFor: user_id} })
-        console.log({deletedMessage})
         return res.status(200).json({
             responseCode: 200,
             responseText: "Message deleted for you successfully",

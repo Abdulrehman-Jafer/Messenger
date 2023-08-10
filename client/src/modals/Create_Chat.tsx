@@ -4,15 +4,17 @@ import { Input } from '@material-tailwind/react';
 import { onChangeHandler } from '../utils/misc';
 import { useCreateChatMutation } from '../redux/service/api';
 import { toast } from 'react-hot-toast';
-import { useTypedSelector } from '../redux/store';
+import { useAppDispatch, useTypedSelector } from '../redux/store';
 import { useNavigate } from 'react-router-dom';
+import { addNewChat } from '../redux/features/chat-slice';
 
 const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, setIsModalOpen: Dispatch<SetStateAction<boolean>>, }) => {
-    const [fields, setFields] = useState<Record<string, any>>({ isNameOrId: "contact_name", contact_id: "", contact_name: "", contact: "" })
+    const [fields, setFields] = useState<Record<string, any>>({ isNameOrNumber: "contact_name", public_number: "", contact_name: "", contact: "" })
     const contacts = useTypedSelector(selector => selector.contactReducer)
     const User = useTypedSelector(selector => selector.userReducer)
-    const [createContact, { isError, isLoading, isSuccess, error, data }] = useCreateChatMutation()
+    const [createNewChatspace, { isError, isLoading, isSuccess, error, data }] = useCreateChatMutation()
     const navigate = useNavigate()
+    const dispatch = useAppDispatch()
 
     useEffect(() => {
         let loaderId;
@@ -22,9 +24,12 @@ const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, se
         if (!isLoading && (isSuccess || isError)) {
             toast.dismiss(loaderId)
             console.log({ data })
-            isSuccess ? toast.success(`${fields.contact_name} added to the contacts`) : toast.error((error as any)?.data?.message || "Failed to Complete")
+            isSuccess ? toast(`Created new chatspace`) : toast.error((error as any)?.data?.message || "Failed to Complete")
             if (isSuccess) {
                 setIsModalOpen(false)
+                if (data.responseCode == 201) {
+                    dispatch(addNewChat(data.result.chatspace))
+                }
                 navigate(`/chats/${data.result.chatspace._id}`)
             }
         }
@@ -33,12 +38,10 @@ const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, se
 
     const handleOk = async () => {
         console.log({ fields, USERID: User._id })
-        if (fields.isNameOrId == "contact_id") {
-            await createContact({ between: [User._id, fields.contact_id] })
-            return;
+        if (fields.isNameOrNumber == "public_number") {
+            return await createNewChatspace({ user_id: User._id, public_numbers: [User.public_number, fields.public_number] })
         }
-        await createContact({ between: [User._id, fields.contact._id] })
-        return;
+        return await createNewChatspace({ user_id: User._id, public_numbers: [User.public_number, fields.contact.public_number] })
     };
 
     const handleCancel = () => {
@@ -50,12 +53,12 @@ const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, se
 
         <Modal title="Create new chat" centered open={isModalOpen} onOk={handleOk} onCancel={handleCancel} okText={"Create new Chat"} okButtonProps={{ className: 'custom-ok-button', loading: isLoading, }}>
             <div className='flex flex-col gap-6'>
-                <select name="isNameOrId" onChange={(e) => onChangeHandler(e, setFields)} className='border-2 text-red-800 border-gray-300 outline-none p-2'>
-                    <option value="contact_name">Use Contact name</option>
-                    <option value="contact_id">Use Contact id</option>
+                <select name="isNameOrNumber" onChange={(e) => onChangeHandler(e, setFields)} className='border-2 text-red-800 border-gray-300 outline-none p-2'>
+                    <option value="contact_name">From saved contacts</option>
+                    <option value="public_number">From public number</option>
                 </select>
                 {
-                    fields.isNameOrId == "contact_name" || fields.isNameorId == "" ?
+                    fields.isNameOrNumber == "contact_name" || fields.isNameOrNumber == "" ?
                         <div>
                             <Input name="contact_name" type="text" size="lg" label="Name" required value={fields.contact_name} onChange={(e) => onChangeHandler(e, setFields)} />
                             <div className='mt-[1rem]'>
@@ -66,7 +69,7 @@ const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, se
                             </div>
                         </div>
                         :
-                        <Input name="contact_id" type="text" size="lg" label="Contact_id" required value={fields.contact_id} onChange={(e) => onChangeHandler(e, setFields)} />
+                        <Input name="public_number" type="text" size="lg" label="Public_number" required value={fields.public_number} onChange={(e) => onChangeHandler(e, setFields)} />
                 }
             </div>
         </Modal>

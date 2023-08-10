@@ -66,7 +66,7 @@ export const api = createApi({
           method: "POST",
         };
       },
-      invalidatesTags: ["Contacts", "Chats"],
+      invalidatesTags: ["Contacts"],
     }),
     getChatspaces: builder.query<any, any>({
       query: ({ user_id, authorization }) => {
@@ -137,3 +137,5 @@ export const {
   useDeleteForMeMutation,
   useDeleteForEveyoneMutation,
 } = api;
+
+export default api;

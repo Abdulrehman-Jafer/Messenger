@@ -10,6 +10,7 @@ export interface User {
   lastLogin: number;
   userToken: string;
   socketId: string | undefined;
+  public_number: string;
 }
 
 const initialState: User = {
@@ -22,6 +23,7 @@ const initialState: User = {
   lastLogin: 100,
   userToken: "",
   socketId: "",
+  public_number: "",
 };
 
 const userSlice = createSlice({

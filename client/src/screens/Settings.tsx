@@ -55,7 +55,7 @@ export default function Settings() {
                     Settings
                 </h3>
                 <div className='border'>
-                    <small className='text-gray-800 p-2'>Account information</small>
+                    <small className='text-gray-800 p-2'>Your public number is {User.public_number}</small>
                     <div className='flex items-center sm:gap-8 gap-2 p-4'>
                         <img src={fixImageUrl(User.image)} alt="user_image" className='w-12 h-12 rounded-full flex-shrink-0' />
                         <div>

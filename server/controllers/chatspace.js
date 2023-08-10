@@ -1,6 +1,7 @@
 import Chatspace from "../models/chatspace.js";
 import Contact from "../models/contact.js";
 import Message from "../models/message.js";
+import User from "../models/user.js";
 
 export const getUserChatSpace = async (req,res,next) => {
     const { user_id } = req.params
@@ -36,10 +37,10 @@ return res.status(200).json({
 } 
 
 export const createChatSpace = async (req,res,next) => {
-    const {between} = req.body
+    const {user_id,public_numbers} = req.body
     try {
         const doesExist = await Chatspace.findOne({
-            between : {$all: between} // Look where all the ids of between matches inside a chat space
+            public_numbers : {$all: public_numbers} // Look where all the ids of between matches inside a chat space
         }).populate("between").exec()
         if(doesExist){
            return res.status(200).json({
@@ -50,15 +51,39 @@ export const createChatSpace = async (req,res,next) => {
                 }
             })
         }
+        let between = []
+        let users = []
+        for(let i = 0; i < public_numbers.length; i++){
+            const user = await User.findOne({public_number:public_numbers[i]})
+            if(!user){
+                return  res.status(400).json({
+                    responseCode: 400,
+                    responseMessage: "Bad request",
+                    body:{
+                        public_numbers
+                    }
+                })
+            }
+            between[i] = user._id
+            users[i] = user;
+        }
         const newChatspace = new Chatspace({
-            between,
+            between,public_numbers
         })
-        const savedChatSpace = await newChatspace.save()
+        await newChatspace.save()
+        const connected_to = users.find(u => !u._id.equals(user_id))
+        const savedContact = await Contact.findOne({ saved_by : user_id, public_number: connected_to.public_number}) 
+        const receiver = { connected_to, contact: savedContact, isSaved: savedContact ? true : false };
+        const sender = users.find(c => c._id.equals(user_id));
+        const modifiedChatspace = {
+            _id: newChatspace._id, sender, receiver
+
+        }
         return res.status(201).json({
             responseCode: 201,
             responseMessage:"Created a new ChatSpace",
             result:{
-                chatspace: savedChatSpace
+                chatspace: modifiedChatspace
             }
         })
     } catch (error) {

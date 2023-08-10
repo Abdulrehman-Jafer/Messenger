@@ -12,7 +12,6 @@ import Create_Chat from "../modals/Create_Chat"
 import { initializeChatSpace } from "../redux/features/chat-slice"
 import socket from "../socket-io/socket"
 import { setUserSocketId } from "../redux/features/user-slice"
-// import LogOut from "../components/LogOut"
 import { getTimeWithAMPMFromDate } from "../utils/time"
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import { setAllChatSpaceMessage } from "../redux/features/messages-slice"
@@ -20,12 +19,11 @@ import Navbar from "../components/Navbar"
 
 
 export default function Home() {
-    const [isModalOpen, setIsModalOpen] = useState(false)
-    // const [isLogOutModalOpen, setIsLogOutModalOpen] = useState(false)
+    const [isChatModalOpen, setIsChatModalOpen] = useState(false)
     const User = useTypedSelector((selector) => selector.userReducer)
-    const { isError, isFetching, isSuccess, isLoading, data } = useGetContactsQuery({ user_id: User._id, Authorization: User.userToken })
-    const { isError: chatError, isLoading: chatLoading, data: chatData, isSuccess: chatSuccess } = useGetChatspacesQuery({ user_id: User._id, Authorization: User.userToken })
-    const { isError: messageError, isLoading: messageLoading, data: messageData, isSuccess: messageSuccess } = useGetAllChatSpaceMessagesQuery({ user_id: User._id })
+    const { isError, isSuccess, isLoading, data } = useGetContactsQuery({ user_id: User._id, Authorization: User.userToken })
+    const { isLoading: chatLoading, data: chatData, isSuccess: chatSuccess } = useGetChatspacesQuery({ user_id: User._id, Authorization: User.userToken })
+    const { isLoading: messageLoading, data: messageData, isSuccess: messageSuccess } = useGetAllChatSpaceMessagesQuery({ user_id: User._id })
     const chats = useTypedSelector(selector => selector.chatReducer)
     const contacts = useTypedSelector(selector => selector.contactReducer)
     const chatspaceMessages = useTypedSelector(selector => selector.messageReducer)
@@ -37,41 +35,22 @@ export default function Home() {
     }
 
     useEffect(() => {
-        if (isSuccess && (!isLoading && !isFetching)) {
+        if (isSuccess && !isLoading) {
             dispatch(setGlobalContacts(data.contacts))
         }
         isError && toast.error("Failed to Load Contacts")
-    }, [isLoading, isFetching])
+    }, [isLoading])
 
     useEffect(() => {
-        let toastId = "";
         if (chatSuccess && !chatLoading) {
-            toastId = toast.success("Loaded Chat Successfully")
             dispatch(initializeChatSpace(chatData.result.chatspaces))
-        }
-        if (!chatLoading && chatError) {
-            toastId = toast.error("Failed to Fetch Chat")
-        }
-        return () => {
-            toast.dismiss(toastId)
         }
     }, [chatLoading])
 
     useEffect(() => {
-        let toastId: any;
-        if (messageLoading) {
-            toastId = toast.loading("Fetching Messages")
-        }
-        if (!messageLoading && (messageSuccess || messageError)) {
-            toast.dismiss(toastId)
-            if (isSuccess) {
-                toast.success("Fetched all messages")
-                dispatch(setAllChatSpaceMessage((messageData as any).result.allChatspaceMessages))
-            }
-        }
-
-        return () => {
-            toast.dismiss(toastId)
+        if (!messageLoading && messageSuccess) {
+            toast.success("Fetched all messages")
+            dispatch(setAllChatSpaceMessage((messageData as any).result.allChatspaceMessages))
         }
     }, [messageLoading])
 
@@ -79,15 +58,9 @@ export default function Home() {
         function socketIdHandler() {
             dispatch(setUserSocketId(socket.id))
         }
-
         socket.emit("set-socketId", User, socketIdHandler)
     }, [])
 
-
-
-    const create_new_chat = () => {
-        setIsModalOpen(true)
-    }
 
     const filteredChat = chats.filter(c => {
         if (c?.receiver.isSaved) {
@@ -111,15 +84,16 @@ export default function Home() {
                             </div>
                         </section>
                         <section className="flex gap-8 overflow-x-auto">
-                            <i className=" text-pink-red text-2xl bg-blue-gray-100 hover:bg-blue-gray-200 rounded-full p-2 cursor-pointer" onClick={create_new_chat}>
+                            <i className=" text-pink-red text-2xl bg-blue-gray-100 hover:bg-blue-gray-200 rounded-full p-2 cursor-pointer" onClick={() => setIsChatModalOpen(true)}>
                                 <AiOutlinePlus />
                             </i>
-                            {isLoading ? <p>Loading Contact...</p> : <div className="flex gap-6 min-w-[200px]  flex-shrink-0">
+                            {isLoading ? <p>Loading Contact...</p> : <div className="flex gap-6 min-w-[200px] flex-shrink-0 items-center">
                                 {contacts.map(c => {
                                     return (
-                                        <RecentContact id={c.contact._id!} key={c.contact._id!} img={c.contact.image || "ass"} name={c.saved_as} />
+                                        <RecentContact id={c.contact._id!} key={c.contact._id!} img={c.contact.image || "ass"} name={c.saved_as} lastLogin={c.contact.lastLogin} />
                                     )
                                 })}
+                                {contacts.length == 0 && <p className="text-grayish">No saved contact found!</p>}
                             </div>
                             }
                         </section>
@@ -141,10 +115,11 @@ export default function Home() {
                                         lastLogin={c.receiver.connected_to.lastLogin}
                                         active_status={getTimeWithAMPMFromDate(lastMessage?.createdAt)}
                                         last_message={lastMessage?.deletedForEveryone ? "This message was deleted" : (lastMessage?.content || "No recent Message")}
-                                        name={c.receiver.isSaved ? c.receiver.contact.saved_as : c.receiver.connected_to._id}
+                                        name={c.receiver.isSaved ? c.receiver.contact.saved_as : c.receiver.connected_to.public_number}
                                         user_image={c.receiver.connected_to.image}
                                         chatspace_id={c._id}
                                         key={c._id}
+                                        isSaved={c.receiver.isSaved}
                                     />
                                 )
                             }) :
@@ -153,7 +128,7 @@ export default function Home() {
                                         <p>No Chat Found</p> :
                                         <>
                                             <p>You dont have any chats</p>
-                                            <i className=" text-pink-red text-2xl bg-blue-gray-100 hover:bg-blue-gray-200 rounded-full p-2 cursor-pointer" onClick={create_new_chat}>
+                                            <i className=" text-pink-red text-2xl bg-blue-gray-100 hover:bg-blue-gray-200 rounded-full p-2 cursor-pointer" onClick={() => setIsChatModalOpen(true)}>
                                                 <AiOutlinePlus />
                                             </i>
                                         </>
@@ -164,7 +139,7 @@ export default function Home() {
                 </div>
                 <Navbar />
             </main>
-            <Create_Chat isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+            <Create_Chat isModalOpen={isChatModalOpen} setIsModalOpen={setIsChatModalOpen} />
         </>
     )
 }

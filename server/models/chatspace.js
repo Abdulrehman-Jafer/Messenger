@@ -7,6 +7,12 @@ const schema = new Schema({
             ref:"User"
         }
     ],
+    public_numbers: [
+        {
+            type: String,
+            required: true
+        }
+    ]
  // Will use as room will add isGroup boolean maybe
 },{timestamps:true})
 

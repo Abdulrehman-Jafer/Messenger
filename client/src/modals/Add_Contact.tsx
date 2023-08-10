@@ -2,15 +2,24 @@ import { Dispatch, SetStateAction, useState, useEffect } from 'react';
 import { Modal } from 'antd';
 import { Input } from '@material-tailwind/react';
 import { onChangeHandler } from '../utils/misc';
-import { useCreateContactMutation } from '../redux/service/api';
+import api, { useCreateContactMutation } from '../redux/service/api';
 import { toast } from 'react-hot-toast';
+import { useAppDispatch } from '../redux/store';
 
-const Add_Contact = ({ isModalOpen, setIsModalOpen, user_id }: { isModalOpen: boolean, setIsModalOpen: Dispatch<SetStateAction<boolean>>, user_id: string }) => {
+const Add_Contact = ({ isModalOpen, setIsModalOpen, user_id, providedPublicNumber }: { isModalOpen: boolean, setIsModalOpen: Dispatch<SetStateAction<boolean>>, user_id: string, providedPublicNumber?: string }) => {
     const [fields, setFields] = useState<Record<string, any>>({
         saved_as: "",
-        contact_id: ""
+        public_number: ""
     })
+
+    const dispatch = useAppDispatch()
+
+    useEffect(() => {
+        setFields(prev => ({ ...prev, public_number: providedPublicNumber }))
+    }, [])
+
     const [createContact, { isError, isLoading, isSuccess, error }] = useCreateContactMutation()
+
     useEffect(() => {
         let loaderId;
         if (isLoading) {
@@ -21,6 +30,7 @@ const Add_Contact = ({ isModalOpen, setIsModalOpen, user_id }: { isModalOpen: bo
             isSuccess ? toast.success(`${fields.saved_as} added to the contacts`) : toast.error((error as any)?.data?.message || "Failed to Complete")
             if (isSuccess) {
                 setIsModalOpen(false)
+                dispatch(api.util.resetApiState())
             }
         }
     }, [isLoading])
@@ -31,6 +41,10 @@ const Add_Contact = ({ isModalOpen, setIsModalOpen, user_id }: { isModalOpen: bo
 
     const handleCancel = () => {
         setIsModalOpen(false);
+        setFields({
+            saved_as: "",
+            public_number: ""
+        })
     };
 
 
@@ -39,7 +53,7 @@ const Add_Contact = ({ isModalOpen, setIsModalOpen, user_id }: { isModalOpen: bo
         <Modal title="Create new contact" centered open={isModalOpen} onOk={handleOk} onCancel={handleCancel} okText={"Create"} okButtonProps={{ className: 'custom-ok-button', loading: isLoading, }}>
             <div className='flex flex-col gap-6'>
                 <Input name="saved_as" type="text" size="lg" label="Name" required value={fields.saved_as} onChange={(e) => onChangeHandler(e, setFields)} />
-                <Input name="contact_id" type="text" size="lg" label="Contact's User id" required value={fields.contact_id} onChange={(e) => onChangeHandler(e, setFields)} />
+                <Input name="public_number" type="text" size="lg" label="Contact's public number" required value={fields.public_number} onChange={(e) => onChangeHandler(e, setFields)} />
             </div>
         </Modal>
     );

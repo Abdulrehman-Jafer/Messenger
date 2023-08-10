@@ -2,10 +2,7 @@ import { useTypedSelector, useAppDispatch } from "../redux/store"
 import { useEffect } from "react"
 import { setGlobalContacts } from "../redux/features/contact-slice"
 import { toast } from "react-hot-toast"
-// import { AiOutlineSearch } from "react-icons/ai"
-import { CiSettings } from "react-icons/ci"
-import { BsChatSquareDots, BsSearch } from "react-icons/bs"
-import { FiUsers } from "react-icons/fi"
+import { BsSearch } from "react-icons/bs"
 import { useNavigate } from "react-router-dom"
 import { useGetContactsQuery } from "../redux/service/api"
 import Contact from "../components/Contact"
@@ -16,7 +13,6 @@ import Navbar from "../components/Navbar"
 export default function Contacts() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const User = useTypedSelector((selector) => selector.userReducer)
-    const navigate = useNavigate()
     const { isError, isFetching, isSuccess, isLoading, data } = useGetContactsQuery({ user_id: User._id, Authorization: User.userToken })
     const contacts = useTypedSelector(selector => selector.contactReducer)
     const dispatch = useAppDispatch()

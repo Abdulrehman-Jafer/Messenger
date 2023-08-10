@@ -3,7 +3,6 @@ import bcrypt from "bcrypt"
 
 export const createUser = async (req,res,next) => {
     const {name,password,email,provider} = req.body
-    console.log({name,email,password,provider,file:req.file})
     try {
         const existingUser = await User.findOne({email,provider})
         if(existingUser){
@@ -13,12 +12,15 @@ export const createUser = async (req,res,next) => {
         }
         const imageFile = req.file
         const hashedPSWD = await bcrypt.hash(password,12)
+        const count = await User.countDocuments()
+        const public_number = String(count + 1).padStart(6,'0')
         const user = new User({
             provider,
             name,
             email,
             password:hashedPSWD,
-            image: `storage/profile_pictures/${imageFile.filename}`
+            image: `storage/profile_pictures/${imageFile.filename}`,
+            public_number
         })
         await user.save()
         return res.status(201).json({
@@ -67,7 +69,9 @@ export const continueWithGoogle = async (req,res,next) => {
                        return next()
                 }
                 const hashedUID = await bcrypt.hash(google_uid,12)
-                const user = new User({provider,name,email,google_uid: hashedUID,image})
+                const count = await User.countDocuments()
+                const public_number = String(count + 1).padStart(6,'0')
+                const user = new User({provider,name,email,google_uid: hashedUID,image,public_number})
                 await user.save()
                 res.locals.user = user
                 return next()

@@ -15,6 +15,10 @@ const schema = new Schema({
             type: Types.ObjectId,
             ref: "User",
             required: true
+        },
+        public_number: {
+            type: String,
+            required: true
         }
 })
 
