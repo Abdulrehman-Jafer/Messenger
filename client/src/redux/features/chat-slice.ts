@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { User } from "./user-slice";
-import { toast } from "react-hot-toast";
+// import { toast } from "react-hot-toast";
 
 interface Contact {
   _id: string;
@@ -12,6 +12,7 @@ interface Contact {
 export interface Message {
   _id: string;
   belongsTo: string;
+  contentType: "text" | "video" | "image" | "uploading";
   content: string;
   sender: User;
   receiver: string;
@@ -72,14 +73,14 @@ const slice = createSlice({
       state[chat_space_related_to_user].receiver.connected_to.socketId =
         action.payload.socketId;
       state[chat_space_related_to_user].receiver.connected_to.lastLogin = 0;
-      toast(
-        `${
-          state[chat_space_related_to_user].receiver.isSaved
-            ? state[chat_space_related_to_user].receiver.contact.saved_as
-            : state[chat_space_related_to_user].receiver.connected_to
-                .public_number
-        } is Online `
-      );
+      // toast(
+      //   `${
+      //     state[chat_space_related_to_user].receiver.isSaved
+      //       ? state[chat_space_related_to_user].receiver.contact.saved_as
+      //       : state[chat_space_related_to_user].receiver.connected_to
+      //           .public_number
+      //   } is Online `
+      // );
       return state;
     },
 
@@ -97,14 +98,14 @@ const slice = createSlice({
         action.payload;
       state[chat_space_related_to_user].receiver.connected_to.lastLogin =
         Date.now();
-      toast(
-        `${
-          state[chat_space_related_to_user].receiver.isSaved
-            ? state[chat_space_related_to_user].receiver.contact.saved_as
-            : state[chat_space_related_to_user].receiver.connected_to
-                .public_number
-        } is Offline`
-      );
+      // toast(
+      //   `${
+      //     state[chat_space_related_to_user].receiver.isSaved
+      //       ? state[chat_space_related_to_user].receiver.contact.saved_as
+      //       : state[chat_space_related_to_user].receiver.connected_to
+      //           .public_number
+      //   } is Offline`
+      // );
       return state;
     },
   },

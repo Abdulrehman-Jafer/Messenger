@@ -1,7 +1,7 @@
 import Message from "../models/message.js";
 import Chatspace from "../models/chatspace.js";
 import {checkIsProvided,invalidDataResponse} from "../utils/checkIsProvided.js"
-import mongoose from "mongoose";
+import socketIo_config from "../configs/socket.io_config.js";
 
 export const sendMessage = async (req,res,next) => {
     const {sender_id,chatspace_id,content} = req.body;

@@ -27,16 +27,15 @@ const slice = createSlice({
     },
 
     updateChatspaceMessage: function (state, action: PayloadAction<any>) {
-      const { chatspace_id, tempId, mongo_message_id, messageStatus } =
-        action.payload;
+      const { chatspace_id, tempId, modifiedMessage } = action.payload;
       const chatspaceIndex = state.findIndex(
         (c) => c.chatspace_id == chatspace_id
       );
       const messageIndex = state[chatspaceIndex].messages.findIndex(
         (m) => m._id == tempId
       );
-      state[chatspaceIndex].messages[messageIndex]._id = mongo_message_id;
-      state[chatspaceIndex].messages[messageIndex].status = 1;
+      console.log({ messageIndex, chatspaceIndex, modifiedMessage });
+      state[chatspaceIndex].messages[messageIndex] = modifiedMessage;
       return state;
     },
 

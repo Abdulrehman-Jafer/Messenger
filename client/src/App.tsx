@@ -11,7 +11,7 @@ import { getSessionStorage } from "./utils/sessionSorage"
 import { useNavigate } from "react-router-dom"
 // import { useValidateQuery } from "./redux/service/api"
 import { useTypedSelector, useAppDispatch } from "./redux/store"
-import { User, initializeUser } from "./redux/features/user-slice"
+import { User, initializeUser, setUserSocketId } from "./redux/features/user-slice"
 // import PageNotFound from "./screens/404"
 import Contacts from "./screens/Contacts"
 import Contact_details from "./screens/Contact_details"
@@ -44,48 +44,64 @@ export default function App() {
     }
   }, [])
 
+
+
+
   useEffect(() => {
 
-    function user_online_Handler(data: any) {
-      dispatch(updateUserOnlineStatusInChatspace({ onlineUser_id: data._id, socketId: data.socketId }))
-      dispatch(updateContactOnlineStatus(data))
+    if (userData._id) {
+
+      function user_online_Handler(data: any) {
+        dispatch(updateUserOnlineStatusInChatspace({ onlineUser_id: data._id, socketId: data.socketId }))
+        dispatch(updateContactOnlineStatus(data))
+      }
+
+      function playNotificationSound() {
+        const audio = new Audio(notificatioSound);
+        audio.play();
+      }
+
+      function socketIdHandler() {
+        dispatch(setUserSocketId(socket.id))
+      }
+
+      function receiveMessageHandler(data: any) {
+        const message = data.message;
+        const chatspace_id = message.belongsTo;
+        console.log({ MessageReceived: data })
+        dispatch(addMessagesInChatspace({ chatspace_id, newMessage: message }))
+        playNotificationSound()
+      }
+
+      function saveMessageHandler(data: any) {
+        dispatch(updateChatspaceMessage({ chatspace_id: data.chatspace_id, tempId: data.tempId, modifiedMessage: data.modifiedMessage }))
+      }
+
+      function deleteMessageForEveryoneHandler(data: any) {
+        dispatch(deleteMessage({ message_id: data.message_id, chatspace_id: data.chatspace_id, deletedForEveryone: true }))
+      }
+
+      function user_offline_Handler(data: any) {
+        dispatch(updateUserOfflineStatusInChatspace(data))
+        dispatch(updateContactOfflineStatus(data))
+      }
+      socket.on("user-online", user_online_Handler)
+      socket.on("set-socketId", socketIdHandler)
+      socket.on("receive-message", receiveMessageHandler)
+      socket.on("message-saved", saveMessageHandler)
+      socket.on("messageDeletedForEveryone", deleteMessageForEveryoneHandler)
+      socket.on("user-offline", user_offline_Handler)
+      return () => {
+        socket.off("set-socketId", socketIdHandler)
+        socket.off("user-online", user_online_Handler)
+        socket.off("receive-message", receiveMessageHandler)
+        socket.off("message-saved", saveMessageHandler)
+        socket.off("messageDeletedForEveryone", deleteMessageForEveryoneHandler)
+        socket.off("user-offline", user_offline_Handler)
+      }
+
     }
 
-    function playNotificationSound() {
-      const audio = new Audio(notificatioSound);
-      audio.play();
-    }
-
-    function receiveMessageHandler(data: any) {
-      const message = data.message;
-      const chatspace_id = message.belongsTo;
-      dispatch(addMessagesInChatspace({ chatspace_id, newMessage: message }))
-      playNotificationSound()
-    }
-
-    function saveMessageHandler(data: any) {
-      dispatch(updateChatspaceMessage({ chatspace_id: data.chatspace_id, tempId: data.tempId, mongo_message_id: data.mongo_message_id }))
-    }
-
-    function deleteMessageForEveryoneHandler(data: any) {
-      dispatch(deleteMessage({ message_id: data.message_id, chatspace_id: data.chatspace_id, deletedForEveryone: true }))
-    }
-
-    function user_offline_Handler(data: any) {
-      dispatch(updateUserOfflineStatusInChatspace(data))
-      dispatch(updateContactOfflineStatus(data))
-    }
-    socket.on("user-online", user_online_Handler)
-    socket.on("receive-message", receiveMessageHandler)
-    socket.on("message-saved", saveMessageHandler)
-    socket.on("user-offline", user_offline_Handler)
-    socket.on("messageDeletedForEveryone", deleteMessageForEveryoneHandler)
-    return () => {
-      socket.off("user-online", user_online_Handler)
-      socket.off("receive-message", receiveMessageHandler)
-      socket.off("message-saved", saveMessageHandler)
-      socket.off("user-offline", user_offline_Handler)
-    }
   }, [socket, userData])
 
 

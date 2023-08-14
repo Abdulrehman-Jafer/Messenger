@@ -5,6 +5,9 @@ export const storage = multer.diskStorage({
         if(req.body.email){
            return cb(null, path.resolve("storage", "profile_pictures"))
         }
+        if(req.body.isChatFile){
+          return cb(null,path.resolve("storage","chat_files"))
+        }
       },
       filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + "_" + Math.round(Math.random() * 1E9)
@@ -13,9 +16,9 @@ export const storage = multer.diskStorage({
 })
 
 export function fileFilter (req,file,cb){
-    if (file.mimetype.startsWith('image/')) {
+    // if (file.mimetype.startsWith('image/')) {
         cb(null, true); // Accept the file
-      } else {
-        cb(new Error('Only image files are allowed.'), false); // Reject the file
-      }
+      // } else {
+      //   cb(new Error('Only image files are allowed.'), false); // Reject the file
+      // }
 }

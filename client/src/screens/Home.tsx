@@ -34,6 +34,12 @@ export default function Home() {
         setChatFilter((e.target as HTMLInputElement).value)
     }
 
+
+    useEffect(() => {
+        socket.emit("set-socketId", User)
+    }, [])
+
+
     useEffect(() => {
         if (isSuccess && !isLoading) {
             dispatch(setGlobalContacts(data.contacts))
@@ -53,13 +59,6 @@ export default function Home() {
             dispatch(setAllChatSpaceMessage((messageData as any).result.allChatspaceMessages))
         }
     }, [messageLoading])
-
-    useEffect(() => {
-        function socketIdHandler() {
-            dispatch(setUserSocketId(socket.id))
-        }
-        socket.emit("set-socketId", User, socketIdHandler)
-    }, [])
 
 
     const filteredChat = chats.filter(c => {

@@ -8,7 +8,7 @@ const store = new mongoStore({
 })
 store.on("error",function(err){
     console.log("session-store-error",err)
-    next(err)
+    throw(new Error("MongoError"))
 })
 
 export default store

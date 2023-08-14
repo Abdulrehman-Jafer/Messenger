@@ -6,6 +6,10 @@ const schema = new Schema({
             ref: "ChatSpace",
             required: true
         },
+        contentType: {
+            type: String, //text //video // image (maybe audio)
+            required: true
+        },
         content: 
         {
             type: String,

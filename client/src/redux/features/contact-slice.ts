@@ -27,7 +27,9 @@ const Slice = createSlice({
       const contactIndex = state.findIndex((c) => {
         return c.contact._id == action.payload._id;
       });
-      state[contactIndex].contact = action.payload;
+      if (contactIndex > -1) {
+        state[contactIndex].contact = action.payload;
+      }
       return state;
     },
 
@@ -35,8 +37,10 @@ const Slice = createSlice({
       const contactIndex = state.findIndex((c) => {
         return c.contact.socketId == action.payload;
       });
-      state[contactIndex].contact.lastLogin = Date.now();
-      state[contactIndex].contact.socketId = "";
+      if (contactIndex > -1) {
+        state[contactIndex].contact.lastLogin = Date.now();
+        state[contactIndex].contact.socketId = "";
+      }
       return state;
     },
   },

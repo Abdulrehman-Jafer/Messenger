@@ -22,7 +22,7 @@ export default function Recent_Chat(props: Recent_Chat_Props) {
     return (
         <>
             <main>
-                <article className="flex justify-between items-center gap-4 p-[1rem] hover:bg-pink-red" onClick={() => navigate(`/chats/${props.chatspace_id}`)}>
+                <article className="flex justify-between items-center gap-4 p-[1rem] hover:bg-pink-red cursor-default" onClick={() => navigate(`/chats/${props.chatspace_id}`)}>
                     <section className="relative">
                         <img src={image_src} alt="contact_image" className="h-10 w-10 rounded-full" />
                         {props.lastLogin == 0 && (
