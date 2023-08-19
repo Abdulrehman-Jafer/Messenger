@@ -76,7 +76,6 @@ export default function Message({ _id, createdAt, belongsTo, content, sender, ne
     const videoRef = useRef<HTMLVideoElement>(null)
 
     const render = () => {
-        console.log({ contentType })
         let toBeRender = <p className="italic">"could not load content"</p>
         if (contentType == "text") {
             toBeRender = (
@@ -91,13 +90,17 @@ export default function Message({ _id, createdAt, belongsTo, content, sender, ne
 
         if (contentType == "video") {
             toBeRender = (
-                <video ref={videoRef} width={videoRef.current?.paused ? "200" : "750"} height={"200"} controls>
-                    <source src={`http://localhost:3000${content}`} type="video/mp4" />
-                </video>)
+                <div>
+                    <video ref={videoRef} className="chatVideoAspectRatio" controls>
+                        <source src={`http://localhost:3000${content}`} type="video/mp4" />
+                    </video>
+                </div>)
         }
 
         if (contentType == "image") {
-            toBeRender = <img src={`http://localhost:3000${content}`} alt="contentImage" width={"200"} />
+            toBeRender = (<div className="chatMediaWidth">
+                <img src={`http://localhost:3000${content}`} alt="contentImage" className="" />
+            </div>)
         }
 
         if (contentType == "uploading") {
@@ -111,20 +114,18 @@ export default function Message({ _id, createdAt, belongsTo, content, sender, ne
     }
 
     return (
-        <main className="relative">
-            <section ref={messageRef} className={`flex items-center gap-2 ${isSentByLoggedInUser ? "justify-end" : "justify-start"} ${marginBottom}`}>
-                {!isSentByLoggedInUser && (
-                    <div className="h-10 w-10 flex-shrink-0">
-                        <img src={fixImageUrl(sender?.image!)} alt="sender_image" className="h-full w-full rounded-full" />
-                    </div>
-                )}
-                <div className="flex flex-col relative">
-                    <Dropdown menu={{ items }} trigger={deletedForEveryone ? [] : ["contextMenu"]}>
-                        {render()}
-                    </Dropdown>
-                    {willShowTime && <small className="text-more-grayish text-right">{createdAt}</small>}
+        <section ref={messageRef} className={`flex items-center gap-2 ${isSentByLoggedInUser ? "justify-end" : "justify-start"} ${marginBottom}`}>
+            {!isSentByLoggedInUser && (
+                <div className="h-10 w-10 flex-shrink-0">
+                    <img src={fixImageUrl(sender?.image!)} alt="sender_image" className="h-full w-full rounded-full" />
                 </div>
-            </section>
-        </main>
+            )}
+            <div className="flex flex-col">
+                <Dropdown menu={{ items }} trigger={deletedForEveryone ? [] : ["contextMenu"]}>
+                    {render()}
+                </Dropdown>
+                {willShowTime && <small className="text-more-grayish text-right">{createdAt}</small>}
+            </div>
+        </section>
     )
 }

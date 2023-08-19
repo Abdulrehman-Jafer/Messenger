@@ -2,11 +2,9 @@ import express from "express"
 import mongoose from "mongoose"
 import dotenv from "dotenv";
 import authRoutes from "./routes/user.js"
-import multer from "multer";
 import cors from "cors"
 import session from "express-session"
 import session_store from "./configs/session-store.js"
-import {fileFilter,storage} from "./configs/multer_config.js"
 import contactRoutes from "./routes/contact.js";
 import chatSpaceRoutes from "./routes/chatspace.js"
 import messageRoutes from "./routes/message.js"
@@ -16,15 +14,9 @@ import socketIo_config from "./configs/socket.io_config.js";
 const app = express()
 dotenv.config();
 app.use(cors());
-app.use(multer({storage,fileFilter}).single("image"))
 app.use(express.json())
 app.use(session({ secret: process.env.SECRET, resave:false, saveUninitialized: false, store: session_store, name:"express-session",}))
 app.use("/storage",express.static("./storage"))
-
-app.use((req,res,next)=>{
-    res.set("Content-Range", "bytes 200-1000/67589")
-    next()
-})
 
 app.use("/auth",authRoutes)
 app.use("/contact",contactRoutes)
@@ -48,8 +40,6 @@ app.use((error,req,res,next)=>{
 })
 const server = http.createServer(app)
 
-
-
 const io  = socketIo_config.init(server)
 
 mongoose.connect(process.env.MONGO_URI).then(()=>{
@@ -61,3 +51,5 @@ export const getIo = () => {
     return io;
 }
 export default app
+
+

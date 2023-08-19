@@ -21,6 +21,8 @@ const slice = createSlice({
       const chatspace_index = state.findIndex(
         (c) => c.chatspace_id == action.payload.chatspace_id
       );
+      if (chatspace_index < 0) return alert("Chat space not found!");
+      console.log({ payload: action.payload });
       console.log({ ADDING_TO_MESSAGE: chatspace_index });
       state[chatspace_index].messages.push(action.payload.newMessage);
       return state;

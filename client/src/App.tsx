@@ -74,6 +74,7 @@ export default function App() {
       }
 
       function saveMessageHandler(data: any) {
+        console.log("SAVED MESSAGE")
         dispatch(updateChatspaceMessage({ chatspace_id: data.chatspace_id, tempId: data.tempId, modifiedMessage: data.modifiedMessage }))
       }
 

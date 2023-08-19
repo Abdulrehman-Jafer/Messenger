@@ -104,7 +104,7 @@ export default function Home() {
                         </section>
                     </article>
                     <article className="flex flex-col chatList-min-height">
-                        {chatLoading ?
+                        {(chatLoading || messageLoading) ?
                             <p>Loading Chats</p> : filteredChat.length > 0 ? filteredChat.map(c => {
                                 const indexOfCurrent = chatspaceMessages.findIndex(m => m.chatspace_id == c._id)
                                 const currentChat = chatspaceMessages[indexOfCurrent]

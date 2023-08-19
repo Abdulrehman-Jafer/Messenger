@@ -4,7 +4,6 @@ import Message from "../models/message.js";
 import {Readable} from "stream"
 import { createWriteStream, mkdirSync } from "fs";
 import { existsSync } from "fs";
-import Ffmpeg from "fluent-ffmpeg";
 
 let io;
 
@@ -19,42 +18,12 @@ export default {
             maxHttpBufferSize:1e8
         })
         io.on("connection",(socket)=>{
-    
-            socket.on("set-socketId",async (user_data)=>{
-                if(!user_data._id) return null;
-                const user = await User.findOneAndUpdate({_id: user_data._id},{socketId: socket.id,lastLogin: 0 },{new: true})
-                socket.broadcast.emit("user-online",user)
-            })
-        
-            socket.on("send-message",async (data)=>{
-                const message = new Message({
-                    belongsTo: data.belongsTo,
-                    content: data.content,
-                    contentType: "text",
-                    sender: data.sender._id,
-                    receiver: data.receiver,
-                    createdAt:data.createdAt,
-                    status: 1,
-                    deletedFor: [],
-                    deletedForEveryone:false
-                })
-                try {
-                    // await message.save()
-                } catch (error) {
-                    throw(new Error(error))
-                }
-                const modifiedMessage = {...message._doc,sender: data.sender}
-                socket.emit("message-saved",{chatspace_id:message.belongsTo,tempId: data._id, modifiedMessage})
-                if(data.receiver.socketId){
-                    console.log({receiverSocketId: data.receiver.socketId})
-                    socket.to(data.receiver.socketId).emit("receive-message",{message:modifiedMessage,sender:data.sender,})
-                }
-            })
-        
-            socket.on("deleteMessageForEveryone", (data) => {
-                socket.to(data.receiverSocketId).emit("messageDeletedForEveryone",{chatspace_id: data.chatspace_id,message_id:data.message_id})
-            })
-            
+        socket.on("set-socketId",async (user_data)=>{
+            if(!user_data._id) return null;
+            const user = await User.findOneAndUpdate({_id: user_data._id},{socketId: socket.id,lastLogin: 0 },{new: true})
+            socket.broadcast.emit("user-online",user)
+        })
+
             socket.on("sendFile",async (data) => {
                 const uniqueSuffix = Date.now() + "_" + Math.round(Math.random() * 1E9)
                 const uniqueName = (uniqueSuffix + "__" + data.filename).replace(/\s+/g, "")
@@ -84,7 +53,7 @@ export default {
                     });
                     // We can also save the meta data of file on the database like name
                     try {
-                        // await message.save()
+                        await message.save()
                         const modifiedMessage = {...message._doc,sender: data.newMessage.sender,receiver:data.newMessage.receiver}
                         socket.emit("message-saved",{chatspace_id:message.belongsTo,tempId, modifiedMessage})
                         if(data.newMessage.receiver.socketId){

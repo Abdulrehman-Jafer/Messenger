@@ -13,6 +13,9 @@ export const api = createApi({
           url: "auth/signup",
           body: requestBody,
           method: "POST",
+          headers: {
+            isSignUpFile: "true",
+          },
         };
       },
     }),
@@ -112,6 +115,30 @@ export const api = createApi({
       },
     }),
 
+    sendMessage: builder.mutation<any, any>({
+      query: (requestBody) => {
+        return {
+          url: "message/send",
+          method: "POST",
+          body: requestBody,
+        };
+      },
+    }),
+
+    sendAttachmentMessage: builder.mutation<any, any>({
+      query: (requestBody) => {
+        return {
+          url: "message/sendattachment",
+          method: "POST",
+          body: requestBody,
+          formData: true,
+          headers: {
+            isChatFile: "true",
+          },
+        };
+      },
+    }),
+
     deleteForEveyone: builder.mutation<any, any>({
       query: (requestBody) => {
         return {
@@ -136,6 +163,8 @@ export const {
   useGetAllChatSpaceMessagesQuery,
   useDeleteForMeMutation,
   useDeleteForEveyoneMutation,
+  useSendMessageMutation,
+  useSendAttachmentMessageMutation,
 } = api;
 
 export default api;

@@ -7,9 +7,11 @@ import { useAppDispatch, useTypedSelector } from "../redux/store"
 import { getTimeWithAMPMFromDate } from "../utils/time"
 import { AiOutlineSend } from "react-icons/ai"
 import socket from "../socket-io/socket"
-import { addMessagesInChatspace } from "../redux/features/messages-slice"
+import { addMessagesInChatspace, updateChatspaceMessage } from "../redux/features/messages-slice"
 import { Modal } from "antd"
 import { fixImageUrl } from "../utils/misc"
+import { useSendMessageMutation, useSendAttachmentMessageMutation } from "../redux/service/api"
+import axios from "axios"
 
 
 export default function Chat_space() {
@@ -27,7 +29,8 @@ export default function Chat_space() {
     const dispatch = useAppDispatch()
     const messages = chatspaceMessages[indexOfCurrent]?.messages || []
     const fileInputRef = useRef<HTMLInputElement>(null)
-
+    const [sendMessageApi] = useSendMessageMutation()
+    const [sendAttachmentApi] = useSendAttachmentMessageMutation()
 
     useEffect(() => {
         const reader = new FileReader();
@@ -47,20 +50,26 @@ export default function Chat_space() {
 
     const sendMessage = (e: React.FormEvent) => {
         e.preventDefault()
+        const tempId = crypto.randomUUID()
         const data = {
             belongsTo: chatspace?._id,
             content: message,
+            contentType: "text",
             sender: User,
             receiver: chatspace?.receiver.connected_to,
             createdAt: new Date().toString(),
             status: -1,
             deletedFor: [],
-            _id: crypto.randomUUID()
+            _id: tempId
         }
         if (!data.content) return;
-        socket.emit("send-message", data)
-        dispatch(addMessagesInChatspace({ chatspace_id, newMessage: data }))
+        dispatch(addMessagesInChatspace({ chatspace_id: chatspace?._id, newMessage: data }))
         setMessage("")
+        sendMessageApi({ data }).then((res: any) => {
+            dispatch(updateChatspaceMessage({ chatspace_id: chatspace?._id, tempId, modifiedMessage: res.data.result.sentMessage }))
+        }).catch(err => {
+            console.log("Message send Error", err)
+        })
     }
 
     const onSelectFileHandler = (e: ChangeEvent) => {
@@ -85,10 +94,19 @@ export default function Chat_space() {
             createdAt: new Date().toString(),
             status: -1,
             deletedFor: [],
-            _id: crypto.randomUUID()
+            _id: `${Math.random()}`
         }
         dispatch(addMessagesInChatspace({ chatspace_id, newMessage: { ...newMessage, contentType: "uploading", content: imagePreview ? "uploading image" : "uploading video" } }))
         socket.emit("sendFile", { chatspace_id, filename: selectedFile?.name, file: selectedFile, newMessage })
+        // const formData = new FormData()
+        // formData.append("attachment", selectedFile!)
+        // formData.append("chatspace_id", chatspace_id!)
+        // formData.append("filename", selectedFile?.name!)
+        // formData.append("newMessage", JSON.stringify(selectedFile?.name))
+        // formData.append("isChatFile", "true")
+        // await sendAttachmentApi(formData).then((res) => {
+        //     console.log({ res })
+        // })
         handleCancel()
     }
 
@@ -135,7 +153,7 @@ export default function Chat_space() {
             </section>
             <section className="sticky bottom-0">
                 <div className="relative">
-                    <form onSubmit={e => sendMessage(e)}>
+                    <form onSubmit={e => sendMessage(e)} encType="multipart/form-data">
                         <input type="text" className="border border-gray-400 outline-none w-full p-[1rem] bg-light-gray" placeholder="Type your message" value={message} onChange={e => setMessage(e.target.value)} />
                         <input key={Math.random()} ref={fileInputRef} type="file" accept="image/*,video/*" className="hidden" onChange={(e) => onSelectFileHandler(e)} />
                         <i className="absolute text-3xl text-grayish hover:text-light-pink bottom-3 right-12" onClick={() => fileInputRef.current?.click()}><AiOutlinePicture /></i>

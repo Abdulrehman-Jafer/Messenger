@@ -68,3 +68,12 @@
 .myBlur {
   filter: blur(10px);
 }
+
+.chatMediaWidth {
+  width: clamp(250px, 600px, 800px);
+}
+
+.chatVideoAspectRatio {
+  aspect-ratio: 16/9;
+  width: clamp(250px, 600px, 800px);
+}
