@@ -26,14 +26,14 @@ export interface Message {
 export interface ChatSpace {
   sender: User;
   receiver: {
-    connected_to: User;
+    connected_to: User & { isTyping?: boolean };
     contact: Contact;
     isSaved: boolean;
   };
   _id: string;
 }
 
-const initialState: ChatSpace[] = [];
+const initialState: ChatSpace[] & { isInitialized?: boolean } = [];
 
 const slice = createSlice({
   initialState,
@@ -58,6 +58,16 @@ const slice = createSlice({
       state[chatspace_index].receiver.isSaved = true;
       state[chatspace_index].receiver.contact = action.payload;
 
+      return state;
+    },
+
+    updateTypingStaus: function (state, action: PayloadAction<any>) {
+      const { chatspace_id, typingStatus } = action.payload;
+      console.log({ payload: action.payload });
+      const chatspace_index = state.findIndex((s) => {
+        return s._id == chatspace_id;
+      });
+      state[chatspace_index].receiver.connected_to.isTyping = typingStatus;
       return state;
     },
 
@@ -117,5 +127,6 @@ export const {
   updateUserOnlineStatusInChatspace,
   updateUserOfflineStatusInChatspace,
   updateContactInfo,
+  updateTypingStaus,
 } = slice.actions;
 export default slice.reducer;

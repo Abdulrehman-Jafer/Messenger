@@ -18,14 +18,24 @@ const slice = createSlice({
     },
 
     addMessagesInChatspace: function (state, action: PayloadAction<any>) {
-      const chatspace_index = state.findIndex(
-        (c) => c.chatspace_id == action.payload.chatspace_id
-      );
-      if (chatspace_index < 0) return alert("Chat space not found!");
-      console.log({ payload: action.payload });
-      console.log({ ADDING_TO_MESSAGE: chatspace_index });
-      state[chatspace_index].messages.push(action.payload.newMessage);
-      return state;
+      if (action.payload.creatingNewChatspace) {
+        const newChatspaceMessage = {
+          chatspace_id: action.payload.chatspace_id,
+          messages: [action.payload.newMessage],
+        };
+        state.push(newChatspaceMessage);
+        return state;
+      } else {
+        const chatspace_index = state.findIndex((c) => {
+          return c.chatspace_id == action.payload.chatspace_id;
+        });
+        console.log({ messagePayload: action.payload });
+        if (chatspace_index < 0) return alert("Chat space not found!");
+        console.log({ payload: action.payload });
+        console.log({ ADDING_TO_MESSAGE: chatspace_index });
+        state[chatspace_index].messages.push(action.payload.newMessage);
+        return state;
+      }
     },
 
     updateChatspaceMessage: function (state, action: PayloadAction<any>) {

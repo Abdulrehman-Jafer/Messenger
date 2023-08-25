@@ -16,11 +16,12 @@ import { User, initializeUser, setUserSocketId } from "./redux/features/user-sli
 import Contacts from "./screens/Contacts"
 import Contact_details from "./screens/Contact_details"
 import socket from "./socket-io/socket"
-import { updateUserOfflineStatusInChatspace, updateUserOnlineStatusInChatspace } from "./redux/features/chat-slice"
+import { addNewChat, updateTypingStaus, updateUserOfflineStatusInChatspace, updateUserOnlineStatusInChatspace } from "./redux/features/chat-slice"
 import { addMessagesInChatspace, deleteMessage, updateChatspaceMessage } from "./redux/features/messages-slice"
 import Settings from "./screens/Settings"
 import notificatioSound from "./assets/whatssapp_web.mp3";
 import { updateContactOfflineStatus, updateContactOnlineStatus } from "./redux/features/contact-slice"
+import api from "./redux/service/api"
 
 
 
@@ -74,7 +75,6 @@ export default function App() {
       }
 
       function saveMessageHandler(data: any) {
-        console.log("SAVED MESSAGE")
         dispatch(updateChatspaceMessage({ chatspace_id: data.chatspace_id, tempId: data.tempId, modifiedMessage: data.modifiedMessage }))
       }
 
@@ -83,26 +83,39 @@ export default function App() {
       }
 
       function user_offline_Handler(data: any) {
+        console.log("Offline User Socket Id", socket.id)
         dispatch(updateUserOfflineStatusInChatspace(data))
         dispatch(updateContactOfflineStatus(data))
+      }
+
+      function updateTypingStatus_handler(payload: any) {
+        dispatch(updateTypingStaus(payload))
+      }
+
+      function newMessagerHandler(data: any) {
+        dispatch(addNewChat(data.chatspace))
+        dispatch(addMessagesInChatspace({ creatingNewChatspace: true, chatspace_id: data.message.belongsTo, newMessage: data.message }))
       }
       socket.on("user-online", user_online_Handler)
       socket.on("set-socketId", socketIdHandler)
       socket.on("receive-message", receiveMessageHandler)
-      socket.on("message-saved", saveMessageHandler)
+      socket.on("message-saved", saveMessageHandler) // Being used for media files
       socket.on("messageDeletedForEveryone", deleteMessageForEveryoneHandler)
+      socket.on("updateTypingStatus", updateTypingStatus_handler)
+      socket.on("new-messager", newMessagerHandler)
       socket.on("user-offline", user_offline_Handler)
       return () => {
+        // socket.disconnect()
         socket.off("set-socketId", socketIdHandler)
         socket.off("user-online", user_online_Handler)
         socket.off("receive-message", receiveMessageHandler)
         socket.off("message-saved", saveMessageHandler)
         socket.off("messageDeletedForEveryone", deleteMessageForEveryoneHandler)
+        socket.off("updateTypingStatus", updateTypingStatus_handler)
         socket.off("user-offline", user_offline_Handler)
+        socket.off("new-messager", newMessagerHandler)
       }
-
     }
-
   }, [socket, userData])
 
 

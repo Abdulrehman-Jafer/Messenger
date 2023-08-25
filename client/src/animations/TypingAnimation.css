@@ -1,0 +1,60 @@
+.typing-indicator {
+  display: flex;
+  align-items: center;
+}
+
+.ball {
+  width: 10px;
+  height: 10px;
+  background-color: #333;
+  border-radius: 50%;
+  margin: 0 5px;
+  animation-duration: 1s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.ball1 {
+  animation-name: bounce1;
+  animation-delay: 0.2s;
+}
+
+.ball2 {
+  animation-name: bounce2;
+  animation-delay: 0.4s;
+}
+
+.ball3 {
+  animation-name: bounce3;
+  animation-delay: 0.6s;
+}
+
+@keyframes bounce1 {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes bounce2 {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes bounce3 {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}

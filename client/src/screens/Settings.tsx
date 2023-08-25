@@ -9,7 +9,7 @@ import { getItem, MenuItem } from '../utils/antd'
 import { Menu, Switch } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { setSessionStorage } from '../utils/sessionSorage'
-import { uninitializeUser } from '../redux/features/user-slice'
+import { UninitializeUser } from '../redux/features/user-slice'
 import { useState } from 'react'
 import Update_Profile_Modal from '../modals/Update_Profile'
 import Warning from '../modals/Warning'
@@ -26,7 +26,7 @@ export default function Settings() {
     const LogOut = () => {
         setSessionStorage("user", "")
         setSessionStorage("authorization", "")
-        dispatch(uninitializeUser())
+        dispatch(UninitializeUser())
         navigate("/auth/")
     }
 

@@ -33,26 +33,20 @@ const userSlice = createSlice({
     initializeUser: function (_, action: PayloadAction<User>) {
       return { ...action.payload };
     },
-    uninitializeUser: function () {
-      return initialState;
-    },
+
     updateUser: function (state, action: PayloadAction<User>) {
       return { ...state, ...action.payload };
     },
+
     setUserSocketId: function (state, action: PayloadAction<string>) {
       return { ...state, socketId: action.payload };
     },
-    UninitilizeUser: function () {
+    UninitializeUser: function () {
       return initialState;
     },
   },
 });
 
-export const {
-  initializeUser,
-  uninitializeUser,
-  updateUser,
-  setUserSocketId,
-  UninitilizeUser,
-} = userSlice.actions;
+export const { initializeUser, updateUser, setUserSocketId, UninitializeUser } =
+  userSlice.actions;
 export default userSlice.reducer;

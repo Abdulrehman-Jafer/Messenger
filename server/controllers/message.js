@@ -39,7 +39,8 @@ export const sendMessage = async (req,res,next) => {
        const modifiedMessage = {...savedMessage._doc,sender: data.sender}
             if(data.receiver.socketId){
                 console.log({receiverSocketId: data.receiver.socketId})
-                io.to(data.receiver.socketId).emit("receive-message",{message:modifiedMessage,sender:data.sender,})
+                console.log({receiver: data.receiver})
+                io.to(data.receiver.socketId).emit("receive-message",{message:modifiedMessage})
             }
         return res.status(201).json({
             responseCode: 201,

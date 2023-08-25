@@ -7,6 +7,7 @@ import { Dropdown, message, } from 'antd';
 import { useDeleteForMeMutation, useDeleteForEveyoneMutation } from "../redux/service/api";
 import { deleteMessage } from "../redux/features/messages-slice";
 import socket from "../socket-io/socket";
+import loadingImage from "../assets/loading_video.jpg"
 
 
 type stylingData = {
@@ -35,7 +36,7 @@ export default function Message({ _id, createdAt, belongsTo, content, sender, ne
 
     useEffect(() => {
         if (messageRef.current) {
-            messageRef.current.scrollIntoView({ behavior: "smooth" });
+            messageRef.current.scrollIntoView();
         }
     }, []);
 
@@ -73,8 +74,6 @@ export default function Message({ _id, createdAt, belongsTo, content, sender, ne
         },
     ]
 
-    const videoRef = useRef<HTMLVideoElement>(null)
-
     const render = () => {
         let toBeRender = <p className="italic">"could not load content"</p>
         if (contentType == "text") {
@@ -91,7 +90,7 @@ export default function Message({ _id, createdAt, belongsTo, content, sender, ne
         if (contentType == "video") {
             toBeRender = (
                 <div>
-                    <video ref={videoRef} className="chatVideoAspectRatio" controls>
+                    <video preload="none" poster={loadingImage} className="chatVideoAspectRatio" controls>
                         <source src={`http://localhost:3000${content}`} type="video/mp4" />
                     </video>
                 </div>)

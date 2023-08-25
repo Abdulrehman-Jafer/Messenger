@@ -18,10 +18,24 @@ export default {
             maxHttpBufferSize:1e8
         })
         io.on("connection",(socket)=>{
+
+        socket.on("disconnect",async ()=>{
+            console.log({socketID:socket.id})
+            console.log("BHAI IS IT DISCONNECTING")
+            const offlineUser = await User.findOneAndUpdate({socketId: socket.id},{socketId: "",lastLogin: Date.now()},{new: true})
+            console.log("disconnectEvnent",offlineUser)
+            socket.broadcast.emit("user-offline",socket.id)
+        })
+
         socket.on("set-socketId",async (user_data)=>{
             if(!user_data._id) return null;
             const user = await User.findOneAndUpdate({_id: user_data._id},{socketId: socket.id,lastLogin: 0 },{new: true})
             socket.broadcast.emit("user-online",user)
+         })
+
+         socket.on("typingStatus",(data)=>{
+            // console.log(data)
+            socket.to(data.receiverSocketId).emit("updateTypingStatus",{chatspace_id:data.chatspace_id, typingStatus: data.typingStatus})
         })
 
             socket.on("sendFile",async (data) => {
@@ -33,7 +47,6 @@ export default {
                         this.push(null)
                     }
                 })
-                console.log({file:data.file})
                 const dir = `./storage/chat_files/${data.chatspace_id}`
                 if(!existsSync(dir)){
                     mkdirSync(dir,{recursive:true})}
@@ -57,20 +70,13 @@ export default {
                         const modifiedMessage = {...message._doc,sender: data.newMessage.sender,receiver:data.newMessage.receiver}
                         socket.emit("message-saved",{chatspace_id:message.belongsTo,tempId, modifiedMessage})
                         if(data.newMessage.receiver.socketId){
-                            console.log({receiverSocketId: data.newMessage.receiver.socketId})
                             socket.to(data.newMessage.receiver.socketId).emit("receive-message",{message:modifiedMessage})
                         }
                     } catch (error) {
                         console.error("Error saving message:", error); 
                     }
                   });
-            
-            socket.on("disconnect",async ()=>{
-                socket.broadcast.emit("user-offline",socket.id)
-                await User.findOneAndUpdate({socketId: socket.id},{socketId: "",lastLogin: Date.now()},{new: true})
-            })
-        })
-        })
+        })})
         return io;
     },
     getIO: ()=>{

@@ -80,7 +80,7 @@ export const api = createApi({
           },
         };
       },
-      providesTags: ["Chats"],
+      providesTags: ["Chats", "Messages"],
     }),
     createChat: builder.mutation<any, any>({
       query: (requsetBody) => {

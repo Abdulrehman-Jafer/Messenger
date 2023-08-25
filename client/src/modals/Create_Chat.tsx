@@ -7,6 +7,7 @@ import { toast } from 'react-hot-toast';
 import { useAppDispatch, useTypedSelector } from '../redux/store';
 import { useNavigate } from 'react-router-dom';
 import { addNewChat } from '../redux/features/chat-slice';
+import { addMessagesInChatspace } from '../redux/features/messages-slice';
 
 const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, setIsModalOpen: Dispatch<SetStateAction<boolean>>, }) => {
     const [fields, setFields] = useState<Record<string, any>>({ isNameOrNumber: "contact_name", public_number: "", contact_name: "", contact: "" })
@@ -15,6 +16,7 @@ const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, se
     const [createNewChatspace, { isError, isLoading, isSuccess, error, data }] = useCreateChatMutation()
     const navigate = useNavigate()
     const dispatch = useAppDispatch()
+    const [message, setMessage] = useState("")
 
     useEffect(() => {
         let loaderId;
@@ -29,6 +31,8 @@ const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, se
                 setIsModalOpen(false)
                 if (data.responseCode == 201) {
                     dispatch(addNewChat(data.result.chatspace))
+                    dispatch(addMessagesInChatspace({ creatingNewChatspace: true, chatspace_id: data.result.message.belongsTo, newMessage: data.result.message }))
+                    console.log({ result: data.result })
                 }
                 navigate(`/chats/${data.result.chatspace._id}`)
             }
@@ -38,10 +42,13 @@ const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, se
 
     const handleOk = async () => {
         console.log({ fields, USERID: User._id })
-        if (fields.isNameOrNumber == "public_number") {
-            return await createNewChatspace({ user_id: User._id, public_numbers: [User.public_number, fields.public_number] })
+        if (message.length == 0 || (fields.public_number.length < 6 && fields.contact_name.length == 0)) {
+            return alert("Fill the form")
         }
-        return await createNewChatspace({ user_id: User._id, public_numbers: [User.public_number, fields.contact.public_number] })
+        if (fields.isNameOrNumber == "public_number") {
+            return await createNewChatspace({ user_id: User._id, public_numbers: [User.public_number, fields.public_number], textMessage: message })
+        }
+        return await createNewChatspace({ user_id: User._id, public_numbers: [User.public_number, fields.contact.public_number], textMessage: message })
     };
 
     const handleCancel = () => {
@@ -50,7 +57,6 @@ const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, se
 
 
     return (
-
         <Modal title="Create new chat" centered open={isModalOpen} onOk={handleOk} onCancel={handleCancel} okText={"Create new Chat"} okButtonProps={{ className: 'custom-ok-button', loading: isLoading, }}>
             <div className='flex flex-col gap-6'>
                 <select name="isNameOrNumber" onChange={(e) => onChangeHandler(e, setFields)} className='border-2 text-red-800 border-gray-300 outline-none p-2'>
@@ -71,6 +77,7 @@ const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, se
                         :
                         <Input name="public_number" type="text" size="lg" label="Public_number" required value={fields.public_number} onChange={(e) => onChangeHandler(e, setFields)} />
                 }
+                <Input name="initial_message" type="text" size="lg" label="Write a message" required value={message} onChange={(e) => setMessage(e.target.value)} />
             </div>
         </Modal>
     );
