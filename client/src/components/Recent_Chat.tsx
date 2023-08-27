@@ -4,6 +4,8 @@ import { fixImageUrl } from "../utils/misc"
 import { useState } from "react"
 import Add_Contact from "../modals/Add_Contact"
 import { useTypedSelector } from "../redux/store"
+import { Dropdown, MenuProps } from "antd"
+
 type Recent_Chat_Props = {
     name: string,
     last_message: string,
@@ -16,22 +18,37 @@ type Recent_Chat_Props = {
 
 export default function Recent_Chat(props: Recent_Chat_Props) {
     const navigate = useNavigate()
-    const image_src = fixImageUrl(props.user_image)
     const [showContactModal, setShowContactModal] = useState(false)
+    const [isDropDownOpen, setIsDropDownOpen] = useState(false)
     const User = useTypedSelector(selector => selector.userReducer)
+
+    const items: MenuProps['items'] = [
+        {
+            label: <button >Add to archive</button>,
+            key: '0',
+        },
+        {
+            label: <button >Delete the chatspace</button>,
+            key: '1',
+        },
+        {
+            label: <button >Blacklist the user</button>,
+            key: '2',
+        },
+    ]
     return (
         <>
-            <main>
-                <article className="flex justify-between items-center gap-4 p-[1rem] hover:bg-pink-red cursor-default" onClick={() => navigate(`/chats/${props.chatspace_id}`)}>
-                    <section className="relative">
-                        <img src={image_src} alt="contact_image" className="h-10 w-10 rounded-full" />
+            <Dropdown menu={{ items }} trigger={["contextMenu"]} onOpenChange={(isopen) => setIsDropDownOpen(isopen)}>
+                <section className={`flex justify-between items-center gap-4 p-[1rem] hover:bg-pink-red cursor-default ${isDropDownOpen && "bg-pink-red"}`} onClick={() => navigate(`/chats/${props.chatspace_id}`)}>
+                    <div className="relative">
+                        <img src={fixImageUrl(props.user_image)} alt="contact_image" className="h-10 w-10 rounded-full" />
                         {props.lastLogin == 0 && (
                             <i className="text-pink-red absolute right-[0rem] bottom-[0rem] backdrop-blur-sm rounded-full">
                                 <GoDotFill />
                             </i>
                         )}
-                    </section>
-                    <section className="flex justify-between flex-1">
+                    </div>
+                    <div className="flex justify-between flex-1">
                         <div className="flex flex-col">
                             <h3 className="text-[1.2rem] maxCharacter text-gray-800">{props.name}</h3>
                             <small className="text-grayish text-style">{props.last_message}</small>
@@ -41,9 +58,9 @@ export default function Recent_Chat(props: Recent_Chat_Props) {
                             {props.isSaved && <p className="invisible pb-1">Dom</p>}
                             <small className={`text-grayish`}>{props.active_status}</small>
                         </div>
-                    </section>
-                </article>
-            </main>
+                    </div>
+                </section>
+            </Dropdown>
             <Add_Contact isModalOpen={showContactModal} setIsModalOpen={setShowContactModal} user_id={User._id} providedPublicNumber={props.name} />
         </>
     )

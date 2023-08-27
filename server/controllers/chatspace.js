@@ -8,12 +8,11 @@ export const getUserChatSpace = async (req, res, next) => {
   const { user_id } = req.params;
   try {
     const chatspaces = await Chatspace.find({
-      between: { $in: [user_id] }
+      between: { $in: [user_id] },deletedFor:{$nin:[user_id]}
     })
       .populate({ path: "between", model: "User" })
       .sort({ updatedAt: -1 })
       .exec();
-
     const userContacts = await Contact.find({ saved_by: user_id });
 
     const modifiedChatSpaces = chatspaces.map((c) => {
@@ -186,3 +185,20 @@ export const getAllChatspaceMessages = async (req, res, next) => {
     },
   });
 };
+
+export const deleteAllMessageOfAChatSpace = async (req,res,next) => {
+   const {user_id} = req.params 
+   const {chatspace_id} = req.querry
+   try {
+     const updateCount = await Message.updateMany({belongsTo: chatspace_id},{$push:{deletedFor:user_id}})
+     return res.status(200).json({
+       responseCode: 200,
+       responseMessage: "Fetched chatSpace successfully",
+       result: {
+         updateCount,
+        },
+      })
+   } catch (error) {
+    next(error)
+   }
+}

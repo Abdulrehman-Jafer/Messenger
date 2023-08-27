@@ -20,10 +20,7 @@ export default {
         io.on("connection",(socket)=>{
 
         socket.on("disconnect",async ()=>{
-            console.log({socketID:socket.id})
-            console.log("BHAI IS IT DISCONNECTING")
-            const offlineUser = await User.findOneAndUpdate({socketId: socket.id},{socketId: "",lastLogin: Date.now()},{new: true})
-            console.log("disconnectEvnent",offlineUser)
+            await User.updateOne({socketId: socket.id},{socketId: "",lastLogin: Date.now()},{new: true})
             socket.broadcast.emit("user-offline",socket.id)
         })
 

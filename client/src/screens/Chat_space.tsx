@@ -17,7 +17,7 @@ import {
     useSendMessageMutation,
     useSendAttachmentMessageMutation,
 } from "../redux/service/api";
-import axios from "axios";
+// import axios from "axios";
 import TypingAnimation from "../animations/TypingAnimation";
 
 export default function Chat_space() {
@@ -42,8 +42,11 @@ export default function Chat_space() {
     const messages = chatspaceMessages[indexOfCurrent]?.messages || [];
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [sendMessageApi] = useSendMessageMutation();
-    const [sendAttachmentApi] = useSendAttachmentMessageMutation();
+    // const [sendAttachmentApi] = useSendAttachmentMessageMutation();
     const [isTyping, setIsTyping] = useState(false);
+
+    const messageFrom = chatspace?.receiver.isSaved ? chatspace.receiver.contact.saved_as
+        : chatspace?.receiver.connected_to.public_number
 
     useEffect(() => {
         socket.emit("typingStatus", {
@@ -88,7 +91,7 @@ export default function Chat_space() {
             addMessagesInChatspace({ chatspace_id: chatspace?._id, newMessage: data })
         );
         setMessage("");
-        sendMessageApi({ data })
+        sendMessageApi({ data, messageFrom })
             .then((res: any) => {
                 dispatch(
                     updateChatspaceMessage({
@@ -173,9 +176,7 @@ export default function Chat_space() {
                 </i>
                 <div className="flex flex-col items-center">
                     <h2 className="text-[1.3rem]">
-                        {chatspace?.receiver.isSaved
-                            ? chatspace.receiver.contact.saved_as
-                            : chatspace?.receiver.connected_to.public_number}
+                        {messageFrom}
                     </h2>
                     <small className="text-pink-red">
                         {chatspace.receiver.connected_to.lastLogin == 0

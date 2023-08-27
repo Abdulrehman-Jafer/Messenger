@@ -71,11 +71,11 @@
 }
 
 .chatMediaWidth {
-  width: clamp(250px, auto, 800px);
+  width: clamp(250px, 60%, 800px);
   /* should add some percentage as the preferred width but there is some problem*/
 }
 
 .chatVideoAspectRatio {
   aspect-ratio: 16/9;
-  width: clamp(250px, auto, 800px);
+  width: clamp(250px, 60%, 800px);
 }

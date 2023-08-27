@@ -90,16 +90,14 @@ export default function Message({ _id, createdAt, belongsTo, content, sender, ne
         if (contentType == "video") {
             toBeRender = (
                 <div>
-                    <video preload="none" poster={loadingImage} className="chatVideoAspectRatio" controls>
+                    <video preload="none" poster={loadingImage} className={`chatVideoAspectRatio rounded-lg ${isSentByLoggedInUser && "float-right"}`} controls>
                         <source src={`http://localhost:3000${content}`} type="video/mp4" />
                     </video>
                 </div>)
         }
 
         if (contentType == "image") {
-            toBeRender = (<div className="chatMediaWidth">
-                <img src={`http://localhost:3000${content}`} alt="contentImage" className="" />
-            </div>)
+            toBeRender = <img src={`http://localhost:3000${content}`} alt="contentImage" className={`chatMediaWidth rounded-lg ${isSentByLoggedInUser && "self-end"}`} />
         }
 
         if (contentType == "uploading") {
@@ -120,10 +118,8 @@ export default function Message({ _id, createdAt, belongsTo, content, sender, ne
                 </div>
             )}
             <div className="flex flex-col">
-                <Dropdown menu={{ items }} trigger={deletedForEveryone ? [] : ["contextMenu"]}>
-                    {render()}
-                </Dropdown>
-                {willShowTime && <small className="text-more-grayish text-right">{createdAt}</small>}
+                {render()}
+                {willShowTime && <small className={`text-more-grayish ${isSentByLoggedInUser ? "!text-right pr-1" : "!text-left pl-1"} `}>{createdAt}</small>}
             </div>
         </section>
     )

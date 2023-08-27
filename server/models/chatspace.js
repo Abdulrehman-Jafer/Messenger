@@ -7,6 +7,12 @@ const schema = new Schema({
             ref:"User"
         }
     ],
+    archived_for: [
+        {
+            type:Types.ObjectId,
+            ref:"User"
+        }
+    ],
     public_numbers: [
         {
             type: String,

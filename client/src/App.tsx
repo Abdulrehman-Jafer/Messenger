@@ -4,7 +4,7 @@ import Auth from "./screens/Auth"
 import { Route, Routes } from "react-router-dom"
 import SignUp from "./screens/SignUp"
 import SignIn from "./screens/SignIn"
-import { Toaster } from "react-hot-toast"
+import { Toaster, toast } from "react-hot-toast"
 import { useEffect } from "react"
 import { getSessionStorage } from "./utils/sessionSorage"
 // import { toast } from "react-hot-toast/headless"
@@ -57,11 +57,6 @@ export default function App() {
         dispatch(updateContactOnlineStatus(data))
       }
 
-      function playNotificationSound() {
-        const audio = new Audio(notificatioSound);
-        audio.play();
-      }
-
       function socketIdHandler() {
         dispatch(setUserSocketId(socket.id))
       }
@@ -69,9 +64,14 @@ export default function App() {
       function receiveMessageHandler(data: any) {
         const message = data.message;
         const chatspace_id = message.belongsTo;
-        console.log({ MessageReceived: data })
-        dispatch(addMessagesInChatspace({ chatspace_id, newMessage: message }))
-        playNotificationSound()
+        toast(`${data.messageFrom}: ${data.message.content}`)
+        const audio = new Audio(notificatioSound);
+        audio.play().then(() => {
+          dispatch(addMessagesInChatspace({ chatspace_id, newMessage: message }))
+        }).catch(err => {
+          console.log("Could not play notification sound", err)
+          dispatch(addMessagesInChatspace({ chatspace_id, newMessage: message }))
+        })
       }
 
       function saveMessageHandler(data: any) {
@@ -93,8 +93,15 @@ export default function App() {
       }
 
       function newMessagerHandler(data: any) {
-        dispatch(addNewChat(data.chatspace))
-        dispatch(addMessagesInChatspace({ creatingNewChatspace: true, chatspace_id: data.message.belongsTo, newMessage: data.message }))
+        const audio = new Audio(notificatioSound);
+        audio.play().then(() => {
+          dispatch(addNewChat(data.chatspace))
+          dispatch(addMessagesInChatspace({ creatingNewChatspace: true, chatspace_id: data.message.belongsTo, newMessage: data.message }))
+        }).catch(err => {
+          console.log("Could not play notification sound", err)
+          dispatch(addNewChat(data.chatspace))
+          dispatch(addMessagesInChatspace({ creatingNewChatspace: true, chatspace_id: data.message.belongsTo, newMessage: data.message }))
+        })
       }
       socket.on("user-online", user_online_Handler)
       socket.on("set-socketId", socketIdHandler)

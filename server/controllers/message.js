@@ -7,7 +7,7 @@ import socketIo_config from "../configs/socket.io_config.js";
 
 
 export const sendMessage = async (req,res,next) => {
-    const {data} = req.body;
+    const {data,messageFrom} = req.body;
     console.log({data})
     try {
         const chatspace = await Chatspace.findOne({
@@ -40,7 +40,7 @@ export const sendMessage = async (req,res,next) => {
             if(data.receiver.socketId){
                 console.log({receiverSocketId: data.receiver.socketId})
                 console.log({receiver: data.receiver})
-                io.to(data.receiver.socketId).emit("receive-message",{message:modifiedMessage})
+                io.to(data.receiver.socketId).emit("receive-message",{message:modifiedMessage,messageFrom})
             }
         return res.status(201).json({
             responseCode: 201,
