@@ -63,6 +63,9 @@ export default function Home() {
 
 
     const filteredChat = chats.filter(c => {
+        const indexOfCurrent = chatspaceMessages.findIndex(m => m.chatspace_id == c._id)
+        const currentChat = chatspaceMessages[indexOfCurrent]
+        if (currentChat?.messages?.length == 0) return;
         if (c?.receiver.isSaved) {
             return c?.receiver.contact.saved_as.toLocaleLowerCase().startsWith(chatFilter.toLocaleLowerCase())
         } else {

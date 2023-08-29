@@ -33,8 +33,11 @@ const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, se
                     dispatch(addNewChat(data.result.chatspace))
                     dispatch(addMessagesInChatspace({ creatingNewChatspace: true, chatspace_id: data.result.message.belongsTo, newMessage: data.result.message }))
                     console.log({ result: data.result })
+                    navigate(`/chats/${data.result.chatspace._id}`)
+                } else {
+                    dispatch(addMessagesInChatspace({ chatspace_id: data.result.message.belongsTo, newMessage: data.result.message }))
+                    navigate(`/chats/${data.result.chatspace._id}`)
                 }
-                navigate(`/chats/${data.result.chatspace._id}`)
             }
         }
     }, [isLoading])

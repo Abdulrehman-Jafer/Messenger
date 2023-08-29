@@ -19,7 +19,7 @@ const schema = new Schema({
             required: true
         }
     ]
- // Will use as room will add isGroup boolean maybe
+ // Will use as room will add isGroupChat boolean maybe
 },{timestamps:true})
 
 const Chatspace = new model("Chatspace",schema)

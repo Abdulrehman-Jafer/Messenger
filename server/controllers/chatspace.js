@@ -53,17 +53,6 @@ export const createChatSpace = async (req, res, next) => {
     const doesExist = await Chatspace.findOne({
       public_numbers: { $all: public_numbers }, // Look where all the ids of between matches inside a chat space
     })
-      .populate("between")
-      .exec();
-    if (doesExist) {
-      return res.status(200).json({
-        responseCode: 200,
-        responseMessage: "Chat Space Alreay Exist",
-        result: {
-          chatspace: doesExist,
-        },
-      });
-    }
     let between = [];
     let users = [];
     for (let i = 0; i < public_numbers.length; i++) {
@@ -80,11 +69,6 @@ export const createChatSpace = async (req, res, next) => {
       between[i] = user._id;
       users[i] = user;
     }
-    const newChatspace = new Chatspace({
-      between,
-      public_numbers,
-    });
-    await newChatspace.save();
     const connected_to = users.find((u) => !u._id.equals(user_id));
     const savedContact = await Contact.findOne({
       saved_by: user_id,
@@ -96,31 +80,42 @@ export const createChatSpace = async (req, res, next) => {
       isSaved: savedContact ? true : false,
     };
     const sender = users.find((c) => c._id.equals(user_id));
+
+    let newChatspace;
+    if(doesExist){
+      newChatspace = doesExist
+    }else{
+      newChatspace = new Chatspace({
+        between,
+        public_numbers,
+      });
+      await newChatspace.save();
+    }
     const modifiedChatspace = {
       _id: newChatspace._id,
       sender,
       receiver,
     };
-
+    
     const message = new Message({
-        belongsTo: newChatspace._id,
-        content: textMessage,
-        contentType: "text",
-        sender: sender._id,
-        receiver: receiver.connected_to._id,
-        createdAt:new Date().toString(),
-        status: 1,
-        deletedFor: [],
-        deletedForEveryone:false
+      belongsTo: newChatspace._id,
+      content: textMessage,
+      contentType: "text",
+      sender: sender._id,
+      receiver: receiver.connected_to._id,
+      createdAt:new Date().toString(),
+      status: 1,
+      deletedFor: [],
+      deletedForEveryone:false
     })
-
+    
     await message.save()
-
+    
     const io = socketIo_config.getIO()
     const modifiedMessage = {
-        ...message._doc,sender
+      ...message._doc,sender
     }
-
+    
     // Just shuffling the sender receiver for the other user
     const io_connected_to = users.find((u) => u._id.equals(user_id));
     const io_sender = receiver.connected_to
@@ -134,21 +129,36 @@ export const createChatSpace = async (req, res, next) => {
       isSaved: io_savedContact ? true : false,
     };
     const ioChatSpace = {
-        _id: newChatspace._id,
-        sender:io_sender,
-        receiver:io_receiver,
+      _id: newChatspace._id,
+      sender:io_sender,
+      receiver:io_receiver,
     }
-    io.to(receiver.connected_to.socketId).emit("new-messager",{chatspace:ioChatSpace,message:modifiedMessage})
+    if(doesExist){
+      const messageFrom = io_receiver.isSaved ? io_receiver.contact.saved_as : io_receiver.connected_to.public_number
+      io.to(receiver.connected_to.socketId).emit("receive-message",{message:modifiedMessage,messageFrom})
+    } else {
+      io.to(receiver.connected_to.socketId).emit("new-messager",{chatspace:ioChatSpace,message:modifiedMessage})
+    }
 
-
-    return res.status(201).json({
-      responseCode: 201,
-      responseMessage: "Created a new ChatSpace",
-      result: {
-        chatspace: modifiedChatspace,
-        message:modifiedMessage
-      },
-    });
+    if(doesExist){
+      return res.status(200).json({
+        responseCode: 200,
+        responseMessage: "Chatspace already exists",
+        result: {
+          chatspace: modifiedChatspace,
+          message:modifiedMessage
+        },
+      });
+    } else {
+      return res.status(201).json({
+        responseCode: 201,
+        responseMessage: "Created a new ChatSpace",
+        result: {
+          chatspace: modifiedChatspace,
+          message:modifiedMessage
+        },
+      }); 
+    }
   } catch (error) {
     next(error);
   }
@@ -187,8 +197,8 @@ export const getAllChatspaceMessages = async (req, res, next) => {
 };
 
 export const deleteAllMessageOfAChatSpace = async (req,res,next) => {
-   const {user_id} = req.params 
-   const {chatspace_id} = req.querry
+  const {chatspace_id} = req.params
+   const user_id = req.get("user_id")
    try {
      const updateCount = await Message.updateMany({belongsTo: chatspace_id},{$push:{deletedFor:user_id}})
      return res.status(200).json({

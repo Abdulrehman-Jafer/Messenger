@@ -38,6 +38,7 @@ export default function Message({ _id, createdAt, belongsTo, content, sender, ne
         if (messageRef.current) {
             messageRef.current.scrollIntoView();
         }
+        // Why can't just use scroll to bottom in parent Chatspace
     }, []);
 
 
