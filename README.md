@@ -2,10 +2,10 @@
 **Note**: This app is currently under development.
 
 ### Home Screen
-![Home_Screen](https://firebasestorage.googleapis.com/v0/b/mern-app-61a6f.appspot.com/o/Messenger%2FHome_Screen.png?alt=media&token=62bc5d56-b69d-4624-b6d9-6b0f71cc0f88)
+![Home_Screen](https://firebasestorage.googleapis.com/v0/b/mern-app-61a6f.appspot.com/o/Messenger%2FHome_Screen.png?alt=media&token=99a0e51c-58e0-457d-8a41-52beb10c53ce)
 
 ### Setting Screen
-![Settings_Screen](https://firebasestorage.googleapis.com/v0/b/mern-app-61a6f.appspot.com/o/Messenger%2FSetting_Screen.png?alt=media&token=eca00ce1-d58b-447e-a80c-9302fa2e6835)
+![Settings_Screen](https://firebasestorage.googleapis.com/v0/b/mern-app-61a6f.appspot.com/o/Messenger%2FSetting_Screen.png?alt=media&token=0d13e249-aaaf-4571-b3e8-726bc9d220b1)
 
 
 **Note**: Following To-do list is understandable me.It may be possible you will not be able to intercept the meaning of someof of the todos.
