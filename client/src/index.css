@@ -10,9 +10,9 @@
 .bottom-boder-radius {
   border-radius: 0 0 2rem 2rem;
 }
-.pinkBorder:focus {
+.inputBorder:focus {
   outline: none;
-  border: 2px solid;
+  border: 1px solid;
   @apply border-more-grayish;
 }
 
@@ -78,4 +78,8 @@
 .chatVideoAspectRatio {
   aspect-ratio: 16/9;
   width: clamp(250px, 60%, 800px);
+}
+
+.ADLaMFont {
+  font-family: "ADLaM Display", cursive;
 }

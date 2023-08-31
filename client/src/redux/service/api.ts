@@ -137,6 +137,7 @@ export const api = createApi({
           },
         };
       },
+      invalidatesTags: ["Messages"],
     }),
 
     deleteForEveyone: builder.mutation<any, any>({
@@ -147,6 +148,29 @@ export const api = createApi({
           body: requestBody,
         };
       },
+      invalidatesTags: ["Messages"],
+    }),
+
+    deleteChatspace: builder.mutation<any, any>({
+      query: (requestBody) => {
+        return {
+          url: "chatspace/delete",
+          method: "DELETE",
+          body: requestBody,
+        };
+      },
+      invalidatesTags: ["Messages"],
+    }),
+
+    addToArchive: builder.mutation<any, any>({
+      query: (requestBody) => {
+        return {
+          url: "chatspace/add/archive",
+          method: "POST",
+          body: requestBody,
+        };
+      },
+      invalidatesTags: ["Chats"],
     }),
   }),
 });
@@ -165,6 +189,8 @@ export const {
   useDeleteForEveyoneMutation,
   useSendMessageMutation,
   useSendAttachmentMessageMutation,
+  useDeleteChatspaceMutation,
+  useAddToArchiveMutation,
 } = api;
 
 export default api;

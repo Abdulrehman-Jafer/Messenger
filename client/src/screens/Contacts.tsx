@@ -40,7 +40,7 @@ export default function Contacts() {
                     </div>
                     <div className="relative">
                         <i className="absolute left-2 top-[1.1rem] text-gray-400 "><BsSearch /></i>
-                        <input type="text" name="contact_search" placeholder="Search" className="border pinkBorder indent-[0.75rem] w-full p-[0.9rem] rounded-[0.75rem] outline-none" />
+                        <input type="text" name="contact_search" placeholder="Search" className="border inputBorder indent-[0.75rem] w-full p-[0.9rem] rounded-md outline-none" />
                     </div>
                     <h1 className="p-3 text-center">List of the all Contacts</h1>
                 </div>

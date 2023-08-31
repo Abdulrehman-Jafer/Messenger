@@ -1,60 +1,55 @@
-.typing-indicator {
-  display: flex;
-  align-items: center;
+.lds-ellipsis {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
 }
-
-.ball {
-  width: 10px;
-  height: 10px;
-  background-color: #333;
+.lds-ellipsis div {
+  position: absolute;
+  top: 33px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
-  margin: 0 5px;
-  animation-duration: 1s;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
+  background: #193b64;
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
 }
-
-.ball1 {
-  animation-name: bounce1;
-  animation-delay: 0.2s;
+.lds-ellipsis div:nth-child(1) {
+  left: 8px;
+  animation: lds-ellipsis1 0.6s infinite;
 }
-
-.ball2 {
-  animation-name: bounce2;
-  animation-delay: 0.4s;
+.lds-ellipsis div:nth-child(2) {
+  left: 8px;
+  animation: lds-ellipsis2 0.6s infinite;
 }
-
-.ball3 {
-  animation-name: bounce3;
-  animation-delay: 0.6s;
+.lds-ellipsis div:nth-child(3) {
+  left: 32px;
+  animation: lds-ellipsis2 0.6s infinite;
 }
-
-@keyframes bounce1 {
-  0%,
+.lds-ellipsis div:nth-child(4) {
+  left: 56px;
+  animation: lds-ellipsis3 0.6s infinite;
+}
+@keyframes lds-ellipsis1 {
+  0% {
+    transform: scale(0);
+  }
   100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
+    transform: scale(1);
   }
 }
-
-@keyframes bounce2 {
-  0%,
-  100% {
-    transform: translateY(0);
+@keyframes lds-ellipsis3 {
+  0% {
+    transform: scale(1);
   }
-  50% {
-    transform: translateY(-10px);
+  100% {
+    transform: scale(0);
   }
 }
-
-@keyframes bounce3 {
-  0%,
-  100% {
-    transform: translateY(0);
+@keyframes lds-ellipsis2 {
+  0% {
+    transform: translate(0, 0);
   }
-  50% {
-    transform: translateY(-10px);
+  100% {
+    transform: translate(24px, 0);
   }
 }

@@ -1,10 +1,14 @@
 import { useNavigate } from "react-router-dom"
 import { GoDotFill } from "react-icons/go"
 import { fixImageUrl } from "../utils/misc"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Add_Contact from "../modals/Add_Contact"
-import { useTypedSelector } from "../redux/store"
+import { useAppDispatch, useTypedSelector } from "../redux/store"
 import { Dropdown, MenuProps } from "antd"
+import { useDeleteChatspaceMutation, useAddToArchiveMutation } from "../redux/service/api"
+import { toast } from "react-hot-toast"
+import { removeChatspaceMessages } from "../redux/features/messages-slice"
+import { updateArchiveStatus } from "../redux/features/chat-slice"
 
 type Recent_Chat_Props = {
     name: string,
@@ -13,7 +17,8 @@ type Recent_Chat_Props = {
     user_image: string,
     chatspace_id: string,
     lastLogin: number,
-    isSaved: boolean
+    isSaved: boolean,
+    user_id: string
 }
 
 export default function Recent_Chat(props: Recent_Chat_Props) {
@@ -21,14 +26,42 @@ export default function Recent_Chat(props: Recent_Chat_Props) {
     const [showContactModal, setShowContactModal] = useState(false)
     const [isDropDownOpen, setIsDropDownOpen] = useState(false)
     const User = useTypedSelector(selector => selector.userReducer)
+    const [deleteChatspace, { isLoading, isError, data }] = useDeleteChatspaceMutation()
+    const [addToArchive, { isLoading: archiveLoading, isError: archiveError, data: archiveData }] = useAddToArchiveMutation()
+    const dispatch = useAppDispatch()
+
+    useEffect(() => {
+        if (!isLoading && isError) {
+            toast.error("Chatspace delete was not successfull")
+        }
+    }, [isLoading])
+
+    useEffect(() => {
+        if (!archiveLoading && archiveError) {
+            toast.error("Archiving was not successfull")
+        }
+    }, [archiveLoading])
+
+    const archiveHandler = () => {
+        addToArchive({ chatspace_id: props.chatspace_id, user_id: props.user_id }).then((res) => {
+            console.log(res)
+        })
+        dispatch(updateArchiveStatus({ chatspace_id: props.chatspace_id, archiveStatus: true }))
+    }
+
+    const deleteChatHandler = () => {
+        deleteChatspace({ chatspace_id: props.chatspace_id, user_id: props.user_id })
+        dispatch(removeChatspaceMessages(props.chatspace_id))
+    }
+
 
     const items: MenuProps['items'] = [
         {
-            label: <button >Add to archive</button>,
+            label: <button onClick={archiveHandler}>Add to archive</button>,
             key: '0',
         },
         {
-            label: <button >Delete the chatspace</button>,
+            label: <button onClick={deleteChatHandler} >Delete the chatspace</button>,
             key: '1',
         },
         {

@@ -220,7 +220,7 @@ export default function Chat_space() {
                                 />
                             );
                         })}
-                        {chatspace.receiver.connected_to.isTyping && (
+                        {(chatspace.receiver.connected_to.isTyping &&
                             <section
                                 ref={typingAnimationRef}
                                 className={`flex items-center gap-2`}
@@ -232,7 +232,9 @@ export default function Chat_space() {
                                         className="h-full w-full rounded-full"
                                     />
                                 </div>
-                                <TypingAnimation />
+                                <div>
+                                    <TypingAnimation />
+                                </div>
                             </section>
                         )}
                     </>

@@ -3,6 +3,7 @@ import Contact from "../models/contact.js";
 import Message from "../models/message.js";
 import User from "../models/user.js";
 import socketIo_config from "../configs/socket.io_config.js";
+import { returnResponse } from "../utils/response.js";
 
 export const getUserChatSpace = async (req, res, next) => {
   const { user_id } = req.params;
@@ -28,10 +29,12 @@ export const getUserChatSpace = async (req, res, next) => {
         isSaved: savedContact ? true : false,
       };
       const sender = c.between.find((c) => c._id.equals(user_id));
+      const isArchived = c.archived_for.includes(user_id)
       return {
         sender,
         receiver: receiver,
         _id: c._id,
+        isArchived
       };
     });
 
@@ -110,7 +113,6 @@ export const createChatSpace = async (req, res, next) => {
     })
     
     await message.save()
-    
     const io = socketIo_config.getIO()
     const modifiedMessage = {
       ...message._doc,sender
@@ -197,18 +199,39 @@ export const getAllChatspaceMessages = async (req, res, next) => {
 };
 
 export const deleteAllMessageOfAChatSpace = async (req,res,next) => {
-  const {chatspace_id} = req.params
-   const user_id = req.get("user_id")
+   const {chatspace_id,user_id} = req.body
    try {
-     const updateCount = await Message.updateMany({belongsTo: chatspace_id},{$push:{deletedFor:user_id}})
+     const updates = await Message.updateMany({belongsTo: chatspace_id},{$push:{deletedFor:user_id}})
+     await Chatspace.updateOne({_id: chatspace_id},{$pull:{archived_for:user_id}})
      return res.status(200).json({
        responseCode: 200,
        responseMessage: "Fetched chatSpace successfully",
        result: {
-         updateCount,
+         updates,
         },
       })
    } catch (error) {
     next(error)
    }
+}
+
+export const addToArchive = async (req,res,next) => {
+  const {chatspace_id,user_id} = req.body;
+  try {
+    const updatedChatspace = await Chatspace.findOneAndUpdate({_id:chatspace_id},{$push:{archived_for:user_id}},{new:true})
+    if(!updatedChatspace){
+      return res.status(404).json({
+        responseCode: 404,
+        responseMessage: "Could not found Chatspace",
+        body: {
+          chatspace_id,
+          user_id
+         },
+      })
+    }
+    return returnResponse(res,200,"successfully added to archive",{updatedChatspace})
+  } catch (error) {
+    error.location = "controllers/chatspace/addToArchive"
+    next(error)
+  }
 }

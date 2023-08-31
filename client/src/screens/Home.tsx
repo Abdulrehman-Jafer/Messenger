@@ -11,12 +11,12 @@ import RecentContact from "../components/RecentContact"
 import Create_Chat from "../modals/Create_Chat"
 import { initializeChatSpace } from "../redux/features/chat-slice"
 import socket from "../socket-io/socket"
-import { setUserSocketId } from "../redux/features/user-slice"
 import { getTimeWithAMPMFromDate } from "../utils/time"
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import { setAllChatSpaceMessage } from "../redux/features/messages-slice"
 import Navbar from "../components/Navbar"
-import { Dropdown, MenuProps } from "antd"
+import no_data_found_image from "../assets/no_data_found.png"
+import LoadingAnimation from "../animations/LoadingAnimation"
 
 
 export default function Home() {
@@ -63,6 +63,7 @@ export default function Home() {
 
 
     const filteredChat = chats.filter(c => {
+        console.log({ chats })
         const indexOfCurrent = chatspaceMessages.findIndex(m => m.chatspace_id == c._id)
         const currentChat = chatspaceMessages[indexOfCurrent]
         if (currentChat?.messages?.length == 0) return;
@@ -105,13 +106,17 @@ export default function Home() {
                         <section>
                             <div className="relative">
                                 <i className="absolute left-2 top-[1.1rem] text-gray-400 "><BsSearch /></i>
-                                <input type="text" name="contact_search" placeholder="Search" value={chatFilter} onChange={e => filterChat(e)} className="border pinkBorder indent-[0.75rem] w-full p-[0.9rem] rounded-[0.75rem] outline-none" />
+                                <input type="text" name="contact_search" placeholder="Search" value={chatFilter} onChange={e => filterChat(e)} className="border inputBorder indent-[0.75rem] w-full p-[0.9rem] rounded-md outline-none" />
                             </div>
                         </section>
                     </article>
                     <article className="flex flex-col chatList-min-height">
                         {(chatLoading || messageLoading) ?
-                            <p>Loading Chats</p> : filteredChat.length > 0 ? filteredChat.map(c => {
+                            <div className="chatList-min-height flex flex-col justify-center items-center">
+                                <LoadingAnimation />
+                                <small>Initializing chats</small>
+                            </div>
+                            : filteredChat.length > 0 ? filteredChat.map(c => {
                                 const indexOfCurrent = chatspaceMessages.findIndex(m => m.chatspace_id == c._id)
                                 const currentChat = chatspaceMessages[indexOfCurrent]
                                 const lastMessage = currentChat?.messages[currentChat.messages.length - 1]
@@ -125,21 +130,24 @@ export default function Home() {
                                         chatspace_id={c._id}
                                         key={c._id}
                                         isSaved={c.receiver.isSaved}
+                                        user_id={User._id}
                                     />
 
                                 )
                             }) :
-                                <div className="flex flex-col items-center justify-center mt-[2rem]">
+                                <div className="flex flex-col items-center justify-center chatList-min-height">
                                     {chatFilter ?
-                                        <p>No Chat Found</p> :
-                                        <>
-                                            <p>You dont have any chats</p>
-                                            <i className=" text-pink-red text-2xl bg-blue-gray-100 hover:bg-blue-gray-200 rounded-full p-2 cursor-pointer" onClick={() => setIsChatModalOpen(true)}>
-                                                <AiOutlinePlus />
-                                            </i>
-                                        </>
+                                        <p className="text-3xl font-sans ADLaMFont">No Chat Found!</p> :
+                                        // <>
+                                        //     <p>You dont have any chats</p>
+                                        //     <i className=" text-pink-red text-2xl bg-blue-gray-100 hover:bg-blue-gray-200 rounded-full p-2 cursor-pointer" onClick={() => setIsChatModalOpen(true)}>
+                                        //         <AiOutlinePlus />
+                                        //     </i>
+                                        // </>
+                                        <img src={no_data_found_image} alt={no_data_found_image} className="min-w-[250px] flex-shrink-0" />
                                     }
                                 </div>
+
                         }
                     </article>
                 </div>

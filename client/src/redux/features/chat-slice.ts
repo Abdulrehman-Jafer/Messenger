@@ -30,22 +30,33 @@ export interface ChatSpace {
     contact: Contact;
     isSaved: boolean;
   };
+  isArchived: boolean;
   _id: string;
 }
 
-const initialState: ChatSpace[] & { isInitialized?: boolean } = [];
+const initialState: ChatSpace[] = [];
 
 const slice = createSlice({
   initialState,
   name: "chats",
   reducers: {
     initializeChatSpace: function (_, action: PayloadAction) {
+      console.log({ payload: action.payload });
       return action.payload;
     },
 
     addNewChat: function (state, action: PayloadAction<any>) {
       state.push(action.payload);
       console.log({ payload: action.payload });
+      return state;
+    },
+
+    updateArchiveStatus: function (state, action: PayloadAction<any>) {
+      const { chatspace_id, isArchived } = action.payload;
+      const chatspace_index = state.findIndex((s) => {
+        return s._id == chatspace_id;
+      });
+      state[chatspace_index].isArchived = isArchived;
       return state;
     },
 
@@ -128,5 +139,6 @@ export const {
   updateUserOfflineStatusInChatspace,
   updateContactInfo,
   updateTypingStaus,
+  updateArchiveStatus,
 } = slice.actions;
 export default slice.reducer;

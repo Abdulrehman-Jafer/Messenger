@@ -38,6 +38,16 @@ const slice = createSlice({
       }
     },
 
+    removeChatspaceMessages: function (state, action: PayloadAction<string>) {
+      const chatspace_id = action.payload;
+      const chatspace_index = state.findIndex(
+        (s) => s.chatspace_id == chatspace_id
+      );
+      console.log({ chatspace_index, chatspace_id });
+      state[chatspace_index].messages = [];
+      return state;
+    },
+
     updateChatspaceMessage: function (state, action: PayloadAction<any>) {
       const { chatspace_id, tempId, modifiedMessage } = action.payload;
       const chatspaceIndex = state.findIndex(
@@ -74,6 +84,7 @@ export const {
   addMessagesInChatspace,
   updateChatspaceMessage,
   deleteMessage,
+  removeChatspaceMessages,
 } = slice.actions;
 
 export default slice.reducer;
