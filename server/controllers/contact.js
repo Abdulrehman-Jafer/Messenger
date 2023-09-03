@@ -6,8 +6,9 @@ const getContacts = async (req,res,next) => {
         const { user_id } = req.params;
         const contacts = await Contact.find({saved_by:user_id}).populate("contact").sort({"contact.lastLogin": 1}).exec()
         return res.status(200).json({
-            message:"Contacts retreiving Successful",
-            contacts
+            responseCode: 200,
+            responseText:"retreived contacts successful",
+            result: contacts
         })
     } catch (error) {
         error.during = "retreiving contacts"
@@ -61,9 +62,7 @@ const createContact = async (req,res,next) => {
     res.status(201).json({
         responseCode: 200,
         responseText:"New Contact Creation Successful",
-        result: {
-            contact:modifiedContact
-        }
+        result: modifiedContact
     })
   } catch (error) {
     error.during = "creating Contact"

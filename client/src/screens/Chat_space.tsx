@@ -17,30 +17,23 @@ import {
     useSendMessageMutation,
     useSendAttachmentMessageMutation,
 } from "../redux/service/api";
-// import axios from "axios";
 import TypingAnimation from "../animations/TypingAnimation";
 
 export default function Chat_space() {
-    const navigate = useNavigate();
-    const { chatspace_id } = useParams();
-    const chatspaceMessages = useTypedSelector(
-        (selector) => selector.messageReducer
-    );
-    const indexOfCurrent = chatspaceMessages.findIndex(
-        (m) => m.chatspace_id == chatspace_id
-    );
-    const chatspace = useTypedSelector((selector) => selector.chatReducer).find(
-        (c) => c._id == chatspace_id
-    )
-    const User = useTypedSelector((selector) => selector.userReducer);
     const [message, setMessage] = useState("");
     const [selectedFile, setSelectedFile] = useState<File>();
     const [imagePreview, setImagePreview] = useState<any>("");
     const [videoPreview, setVideoPreview] = useState<any>("");
     const [showPreview, setShowPreview] = useState(false);
-    const dispatch = useAppDispatch();
-    const messages = chatspaceMessages[indexOfCurrent]?.messages || [];
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const navigate = useNavigate();
+    const dispatch = useAppDispatch();
+    const User = useTypedSelector((selector) => selector.userReducer);
+    const { chatspace_id } = useParams();
+    const chatReducer = useTypedSelector((selector) => selector.messageReducer);
+    const indexOfCurrent = chatReducer.chatspacesMessages.findIndex((m) => m.chatspace_id == chatspace_id);
+    const chatspace = useTypedSelector((selector) => selector.chatReducer).chats.find((c) => c._id == chatspace_id)
+    const messages = chatReducer.chatspacesMessages[indexOfCurrent]?.messages || [];
     const [sendMessageApi] = useSendMessageMutation();
     // const [sendAttachmentApi] = useSendAttachmentMessageMutation();
     const [isTyping, setIsTyping] = useState(false);

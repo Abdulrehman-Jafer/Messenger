@@ -34,51 +34,56 @@ export interface ChatSpace {
   _id: string;
 }
 
-const initialState: ChatSpace[] = [];
+const initialState: {
+  isInitialized: boolean,
+  chats:ChatSpace[]
+} = {
+isInitialized:false,
+chats: []
+};
 
 const slice = createSlice({
   initialState,
   name: "chats",
   reducers: {
-    initializeChatSpace: function (_, action: PayloadAction) {
-      console.log({ payload: action.payload });
-      return action.payload;
+    initializeChatSpace: function (state, action: PayloadAction<any>) {
+      state.isInitialized = true;
+      state.chats = action.payload
+      return state;
     },
 
     addNewChat: function (state, action: PayloadAction<any>) {
-      state.push(action.payload);
-      console.log({ payload: action.payload });
+      state.chats.push(action.payload);
       return state;
     },
 
     updateArchiveStatus: function (state, action: PayloadAction<any>) {
       const { chatspace_id, isArchived } = action.payload;
-      const chatspace_index = state.findIndex((s) => {
+      const chatspace_index = state.chats.findIndex((s) => {
         return s._id == chatspace_id;
       });
-      state[chatspace_index].isArchived = isArchived;
+      state.chats[chatspace_index].isArchived = isArchived;
       return state;
     },
 
     updateContactInfo: function (state, action: PayloadAction<any>) {
       const { contact } = action.payload;
-      const chatspace_index = state.findIndex((s) => {
+      const chatspace_index = state.chats.findIndex((s) => {
         return s.receiver.connected_to._id == contact._id;
       });
 
-      state[chatspace_index].receiver.isSaved = true;
-      state[chatspace_index].receiver.contact = action.payload;
-
+      state.chats[chatspace_index].receiver.isSaved = true;
+      state.chats[chatspace_index].receiver.contact = action.payload;
       return state;
     },
 
     updateTypingStaus: function (state, action: PayloadAction<any>) {
       const { chatspace_id, typingStatus } = action.payload;
       console.log({ payload: action.payload });
-      const chatspace_index = state.findIndex((s) => {
+      const chatspace_index = state.chats.findIndex((s) => {
         return s._id == chatspace_id;
       });
-      state[chatspace_index].receiver.connected_to.isTyping = typingStatus;
+      state.chats[chatspace_index].receiver.connected_to.isTyping = typingStatus;
       return state;
     },
 
@@ -87,18 +92,18 @@ const slice = createSlice({
       action: PayloadAction<any>
     ) {
       const onlineUser_id = action.payload.onlineUser_id;
-      const chat_space_related_to_user = state.findIndex(
+      const chat_space_related_to_user = state.chats.findIndex(
         (c) => c.receiver.connected_to._id == onlineUser_id
       );
       if (chat_space_related_to_user == -1) return state;
-      state[chat_space_related_to_user].receiver.connected_to.socketId =
+      state.chats[chat_space_related_to_user].receiver.connected_to.socketId =
         action.payload.socketId;
-      state[chat_space_related_to_user].receiver.connected_to.lastLogin = 0;
+      state.chats[chat_space_related_to_user].receiver.connected_to.lastLogin = 0;
       // toast(
       //   `${
-      //     state[chat_space_related_to_user].receiver.isSaved
-      //       ? state[chat_space_related_to_user].receiver.contact.saved_as
-      //       : state[chat_space_related_to_user].receiver.connected_to
+      //     state.chats[chat_space_related_to_user].receiver.isSaved
+      //       ? state.chats[chat_space_related_to_user].receiver.contact.saved_as
+      //       : state.chats[chat_space_related_to_user].receiver.connected_to
       //           .public_number
       //   } is Online `
       // );
@@ -110,20 +115,20 @@ const slice = createSlice({
       action: PayloadAction<string>
     ) {
       const socketId = action.payload;
-      const chat_space_related_to_user = state.findIndex(
+      const chat_space_related_to_user = state.chats.findIndex(
         (c) => c.receiver.connected_to.socketId == socketId
       );
       console.log({ OFFLINE: "DISPATCHING", chat_space_related_to_user });
       if (chat_space_related_to_user == -1) return state;
-      state[chat_space_related_to_user].receiver.connected_to.socketId =
+      state.chats[chat_space_related_to_user].receiver.connected_to.socketId =
         action.payload;
-      state[chat_space_related_to_user].receiver.connected_to.lastLogin =
+      state.chats[chat_space_related_to_user].receiver.connected_to.lastLogin =
         Date.now();
       // toast(
       //   `${
-      //     state[chat_space_related_to_user].receiver.isSaved
-      //       ? state[chat_space_related_to_user].receiver.contact.saved_as
-      //       : state[chat_space_related_to_user].receiver.connected_to
+      //     state.chats[chat_space_related_to_user].receiver.isSaved
+      //       ? state.chats[chat_space_related_to_user].receiver.contact.saved_as
+      //       : state.chats[chat_space_related_to_user].receiver.connected_to
       //           .public_number
       //   } is Offline`
       // );

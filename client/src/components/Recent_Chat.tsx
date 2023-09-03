@@ -18,10 +18,11 @@ type Recent_Chat_Props = {
     chatspace_id: string,
     lastLogin: number,
     isSaved: boolean,
-    user_id: string
+    user_id: string,
+    isArchived: boolean
 }
 
-export default function Recent_Chat(props: Recent_Chat_Props) {
+export default function Recent_Chat({ active_status, chatspace_id, isArchived, isSaved, lastLogin, last_message, name, user_id, user_image }: Recent_Chat_Props) {
     const navigate = useNavigate()
     const [showContactModal, setShowContactModal] = useState(false)
     const [isDropDownOpen, setIsDropDownOpen] = useState(false)
@@ -43,39 +44,43 @@ export default function Recent_Chat(props: Recent_Chat_Props) {
     }, [archiveLoading])
 
     const archiveHandler = () => {
-        addToArchive({ chatspace_id: props.chatspace_id, user_id: props.user_id }).then((res) => {
+        addToArchive({ chatspace_id, user_id }).then((res) => {
             console.log(res)
         })
-        dispatch(updateArchiveStatus({ chatspace_id: props.chatspace_id, archiveStatus: true }))
+        dispatch(updateArchiveStatus({ chatspace_id, archiveStatus: true }))
     }
 
     const deleteChatHandler = () => {
-        deleteChatspace({ chatspace_id: props.chatspace_id, user_id: props.user_id })
-        dispatch(removeChatspaceMessages(props.chatspace_id))
+        deleteChatspace({ chatspace_id, user_id })
+        dispatch(removeChatspaceMessages(chatspace_id))
     }
 
 
+
     const items: MenuProps['items'] = [
-        {
+        (isArchived ? {
+            label: <button onClick={archiveHandler}>Remove from archive</button>,
+            key: '0',
+        } : {
             label: <button onClick={archiveHandler}>Add to archive</button>,
             key: '0',
-        },
+        }),
         {
             label: <button onClick={deleteChatHandler} >Delete the chatspace</button>,
             key: '1',
         },
         {
-            label: <button >Blacklist the user</button>,
+            label: <button >Block user</button>,
             key: '2',
         },
     ]
     return (
         <>
             <Dropdown menu={{ items }} trigger={["contextMenu"]} onOpenChange={(isopen) => setIsDropDownOpen(isopen)}>
-                <section className={`flex justify-between items-center gap-4 p-[1rem] hover:bg-pink-red cursor-default ${isDropDownOpen && "bg-pink-red"}`} onClick={() => navigate(`/chats/${props.chatspace_id}`)}>
+                <section tabIndex={0} className={`group flex justify-between items-center gap-4 p-[1rem] border-cyan-400 hover:bg-pink-red cursor-default ${isDropDownOpen && "bg-pink-red"}`} onClick={() => navigate(`/chats/${chatspace_id}`)}>
                     <div className="relative">
-                        <img src={fixImageUrl(props.user_image)} alt="contact_image" className="h-10 w-10 rounded-full" />
-                        {props.lastLogin == 0 && (
+                        <img src={fixImageUrl(user_image)} alt="contact_image" className="h-10 w-10 rounded-full" />
+                        {lastLogin == 0 && (
                             <i className="text-pink-red absolute right-[0rem] bottom-[0rem] backdrop-blur-sm rounded-full">
                                 <GoDotFill />
                             </i>
@@ -83,18 +88,19 @@ export default function Recent_Chat(props: Recent_Chat_Props) {
                     </div>
                     <div className="flex justify-between flex-1">
                         <div className="flex flex-col">
-                            <h3 className="text-[1.2rem] maxCharacter text-gray-800">{props.name}</h3>
-                            <small className="text-grayish text-style">{props.last_message}</small>
+                            {!isSaved && <p className="invisible">DOM</p>}
+                            <h3 className="text-[1.2rem] maxCharacter text-gray-800">{name}</h3>
+                            <small className="text-grayish text-style">{last_message}</small>
                         </div>
-                        <div className="flex flex-col">
-                            {!props.isSaved && <button className="text-gray-400 underline italic pb-1" onClick={(e) => { e.stopPropagation(); setShowContactModal(true) }}>Add to the contacts</button>}
-                            {props.isSaved && <p className="invisible pb-1">Dom</p>}
-                            <small className={`text-grayish`}>{props.active_status}</small>
+                        <div className="flex flex-col items-end">
+                            {!isSaved && <button className="text-more-grayish underline pb-1 ADLaMFont" onClick={(e) => { e.stopPropagation(); setShowContactModal(true) }}>Save contact</button>}
+                            <small className={`text-light-pink border border-pink-red group-hover:border-green-500 group-hover:text-green-400 rounded-sm p-[2px] ${isDropDownOpen && "border-green-500 text-green-400"}`}>archived</small>
+                            <small className={`text-grayish text-end px-1 mt-1`}>{active_status}</small>
                         </div>
                     </div>
                 </section>
             </Dropdown>
-            <Add_Contact isModalOpen={showContactModal} setIsModalOpen={setShowContactModal} user_id={User._id} providedPublicNumber={props.name} />
+            <Add_Contact isModalOpen={showContactModal} setIsModalOpen={setShowContactModal} user_id={User._id} providedPublicNumber={name} />
         </>
     )
 }

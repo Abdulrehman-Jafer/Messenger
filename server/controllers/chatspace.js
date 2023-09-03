@@ -41,9 +41,7 @@ export const getUserChatSpace = async (req, res, next) => {
     return res.status(200).json({
       responseCode: 200,
       responseMessage: "Retrieving all chatspaces Successful",
-      result: {
-        chatspaces: modifiedChatSpaces,
-      },
+      result: modifiedChatSpaces
     });
   } catch (error) {
     next(error);
@@ -192,9 +190,7 @@ export const getAllChatspaceMessages = async (req, res, next) => {
   return res.status(200).json({
     responseCode: 200,
     responseMessage: "Fetched chatSpace successfully",
-    result: {
-      allChatspaceMessages,
-    },
+    result: allChatspaceMessages,
   });
 };
 

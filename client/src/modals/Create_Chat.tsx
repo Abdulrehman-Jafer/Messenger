@@ -11,7 +11,7 @@ import { addMessagesInChatspace } from '../redux/features/messages-slice';
 
 const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, setIsModalOpen: Dispatch<SetStateAction<boolean>>, }) => {
     const [fields, setFields] = useState<Record<string, any>>({ isNameOrNumber: "contact_name", public_number: "", contact_name: "", contact: "" })
-    const contacts = useTypedSelector(selector => selector.contactReducer)
+    const contactReducer = useTypedSelector(selector => selector.contactReducer)
     const User = useTypedSelector(selector => selector.userReducer)
     const [createNewChatspace, { isError, isLoading, isSuccess, error, data }] = useCreateChatMutation()
     const navigate = useNavigate()
@@ -72,7 +72,7 @@ const Create_Chat = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, se
                             <Input name="contact_name" type="text" size="lg" label="Name" required value={fields.contact_name} onChange={(e) => onChangeHandler(e, setFields)} />
                             <div className='mt-[1rem]'>
                                 <h1 className='text-center font-bold'>Filtered Contacts</h1>
-                                {contacts.filter((c) => c.saved_as.toLocaleLowerCase().startsWith(fields.contact_name.toLocaleLowerCase())).splice(0, 5).map((c) => {
+                                {contactReducer.contacts.filter((c) => c.saved_as.toLocaleLowerCase().startsWith(fields.contact_name.toLocaleLowerCase())).splice(0, 5).map((c) => {
                                     return <p key={c._id} onClick={() => setFields(prev => ({ ...prev, contact_name: c.saved_as, contact: c.contact }))} className='hover:bg-pink-red p-[1rem] border-b-2'>{c.saved_as}</p>
                                 })}
                             </div>
