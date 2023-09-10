@@ -19,7 +19,7 @@ const app = express()
 dotenv.config();
 app.use(cors());
 app.use(express.json())
-app.use(session({ secret: process.env.SECRET, resave:false, saveUninitialized: false, store: session_store, name:"express-session",}))
+// app.use(session({ secret: process.env.SECRET, resave:false, saveUninitialized: false, store: session_store, name:"express-session",}))
 app.use("/storage",express.static("./storage"))
 
 app.use("/user",authRoutes)
@@ -33,7 +33,7 @@ app.use(handleError)
 
 
 const server = http.createServer(app)
-const io  = socketIo_config.init(server)
+socketIo_config.init(server) // For initializing socket
 mongoose.connect(process.env.MONGO_URI).then(()=>{
     // User.collection.getIndexes({full: true}).then(indexes => {
     //     console.log("indexes of User", indexes);

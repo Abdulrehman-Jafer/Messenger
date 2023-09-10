@@ -8,7 +8,7 @@ import { Dropdown, MenuProps } from "antd"
 import { useDeleteChatspaceMutation, useAddToArchiveMutation, useRemoveFromArchiveMutation, useBlockUserMutation } from "../redux/service/api"
 import { toast } from "react-hot-toast"
 import { removeChatspaceMessages } from "../redux/features/messages-slice"
-import { updateArchiveStatus } from "../redux/features/chat-slice"
+import { updateArchiveStatus, updateUserOnlineStatusInChatspace } from "../redux/features/chat-slice"
 import dummy_user_image from "../assets/blocked_user.png"
 
 type Recent_Chat_Props = {
@@ -21,10 +21,12 @@ type Recent_Chat_Props = {
     isSaved: boolean,
     user_id: string,
     isTyping?: boolean,
-    isArchived: boolean
+    isArchived: boolean,
+    connected_to_public_number: string,
+    receiver_socket_id: string | undefined
 }
 
-export default function Recent_Chat({ active_status, chatspace_id, isArchived, isSaved, lastLogin, last_message, name, user_id, user_image, isTyping }: Recent_Chat_Props) {
+export default function Recent_Chat({ active_status, chatspace_id, isArchived, isSaved, lastLogin, last_message, name, user_id, user_image, isTyping, connected_to_public_number, receiver_socket_id }: Recent_Chat_Props) {
     const navigate = useNavigate()
     const [showContactModal, setShowContactModal] = useState(false)
     const [isDropDownOpen, setIsDropDownOpen] = useState(false)
@@ -74,7 +76,9 @@ export default function Recent_Chat({ active_status, chatspace_id, isArchived, i
     }
 
     const blockUserHandler = () => {
-        blockUser({})
+        blockUser({ public_number: connected_to_public_number, user_id: User._id })
+        // dispatch(updateUserOfflineStatusInChatspace(data))
+        // dispatch(updateContactOfflineStatus(data))
     }
 
 

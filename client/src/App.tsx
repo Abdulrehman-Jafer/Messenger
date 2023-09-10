@@ -80,10 +80,11 @@ export default function App() {
         dispatch(deleteMessage({ message_id: data.message_id, chatspace_id: data.chatspace_id, deletedForEveryone: true }))
       }
 
-      function user_offline_Handler(data: any) {
+      function user_offline_Handler(socketId: string) {
         console.log("Offline User Socket Id", socket.id)
-        dispatch(updateUserOfflineStatusInChatspace(data))
-        dispatch(updateContactOfflineStatus(data))
+        console.log({ socketId })
+        dispatch(updateUserOfflineStatusInChatspace(socketId))
+        dispatch(updateContactOfflineStatus(socketId))
       }
 
       function updateTypingStatus_handler(payload: any) {

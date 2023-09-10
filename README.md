@@ -1,5 +1,7 @@
 # Messenger
 **Note**: This app is currently under development.
+Introducing a powerful and feature-rich chat application built with cutting-edge technologies to facilitate seamless communication between users. This chat app combines the real-time capabilities of Socket.IO, the front-end prowess of React with TypeScript, state management via Redux Toolkit, and a robust back end powered by Node.js, Express.js, JWT for authentication, and MongoDB as the database. It also incorporates Multer for efficient file handling and Mongoose for smooth MongoDB integration.
+
 
 ### Home Screen
 ![Home_Screen](https://firebasestorage.googleapis.com/v0/b/mern-app-61a6f.appspot.com/o/Messenger%2FHome_Screen.png?alt=media&token=99a0e51c-58e0-457d-8a41-52beb10c53ce)

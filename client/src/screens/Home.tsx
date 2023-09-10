@@ -106,6 +106,7 @@ export default function Home() {
                                         isTyping={c.receiver.connected_to.isTyping}
                                         isSaved={c.receiver.isSaved}
                                         isArchived={c.isArchived}
+                                        connected_to_public_number={c.receiver.connected_to.public_number}
                                         user_id={User._id} />)
                             }) :
                                 <div className="flex flex-col items-center justify-center chatList-min-height">

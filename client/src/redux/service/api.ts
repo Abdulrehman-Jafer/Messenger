@@ -40,6 +40,16 @@ export const api = createApi({
       },
     }),
 
+    blockUser: builder.mutation<any, any>({
+      query: (requestBody) => {
+        return {
+          url: "user/block",
+          method: "PUT",
+          body: requestBody,
+        };
+      },
+    }),
+
     validate: builder.query<any, any>({
       query: ({ authorization, User_id }) => {
         return {
@@ -188,16 +198,6 @@ export const api = createApi({
         };
       },
       invalidatesTags: ["Chats"],
-    }),
-
-    blockUser: builder.mutation<any, any>({
-      query: (requestBody) => {
-        return {
-          url: "user/block",
-          method: "PUT",
-          body: requestBody,
-        };
-      },
     }),
   }),
 });

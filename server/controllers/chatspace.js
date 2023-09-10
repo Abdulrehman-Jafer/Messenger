@@ -130,6 +130,12 @@ export const getUserChatSpace = async (req, res, next) => {
         isSaved: savedContact ? true : false,
       };
       const sender = c.between.find((c) => c._id.equals(user_id));
+      const isBlocked = sender.blocked_user.includes(receiver.connected_to._id)
+      if(isBlocked){
+        delete receiver.connected_to.image
+        delete receiver.connected_to.lastLogin
+      }
+      console.log({isBlocked})
       const isArchived = c.archived_for.includes(user_id)
       return {
         sender,
