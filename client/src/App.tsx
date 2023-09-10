@@ -21,8 +21,7 @@ import { addMessagesInChatspace, deleteMessage, updateChatspaceMessage } from ".
 import Settings from "./screens/Settings"
 import notificatioSound from "./assets/whatssapp_web.mp3";
 import { updateContactOfflineStatus, updateContactOnlineStatus } from "./redux/features/contact-slice"
-import api from "./redux/service/api"
-
+import notficationSound from "./assets/whatssapp_web.mp3"
 
 
 
@@ -31,13 +30,14 @@ export default function App() {
   const navigate = useNavigate()
   const Authorization = getSessionStorage("authorization")
   const user: Omit<User, "lastLogin"> = getSessionStorage("user")
-  const userData = useTypedSelector((state) => state.userReducer)
+  const userReducer = useTypedSelector((state) => state.userReducer)
+  const chatReducer = useTypedSelector(state => state.chatReducer)
   const dispatch = useAppDispatch()
 
   useEffect(() => {
-    if (userData?._id) {
+    if (userReducer?._id) {
       return navigate("/chats")
-    } else if (!userData?._id && (Authorization && user?._id)) {
+    } else if (!userReducer?._id && (Authorization && user?._id)) {
       dispatch(initializeUser({ ...user, userToken: Authorization, lastLogin: 0 }))
       return navigate("/chats")
     } else {
@@ -45,12 +45,9 @@ export default function App() {
     }
   }, [])
 
-
-
-
   useEffect(() => {
 
-    if (userData._id) {
+    if (userReducer._id && chatReducer.isInitialized) {
 
       function user_online_Handler(data: any) {
         dispatch(updateUserOnlineStatusInChatspace({ onlineUser_id: data._id, socketId: data.socketId }))
@@ -64,14 +61,15 @@ export default function App() {
       function receiveMessageHandler(data: any) {
         const message = data.message;
         const chatspace_id = message.belongsTo;
-        toast(`${data.messageFrom}: ${data.message.content}`)
-        const audio = new Audio(notificatioSound);
-        audio.play().then(() => {
-          dispatch(addMessagesInChatspace({ chatspace_id, newMessage: message }))
-        }).catch(err => {
-          console.log("Could not play notification sound", err)
-          dispatch(addMessagesInChatspace({ chatspace_id, newMessage: message }))
-        })
+        const chatIndex = chatReducer.chats.findIndex(c => c._id == chatspace_id)
+        console.log({ chat: chatReducer.chats[chatIndex], isInitialized: chatReducer.isInitialized })
+        const isArchived = chatReducer.chats[chatIndex].isArchived
+        if (!isArchived) {
+          const ringTone = new Audio(notficationSound)
+          ringTone.play()
+          toast(`${data.messageFrom}: ${data.message.content}`)
+        }
+        dispatch(addMessagesInChatspace({ chatspace_id, newMessage: message, isReceivedMessage: true }))
       }
 
       function saveMessageHandler(data: any) {
@@ -123,7 +121,7 @@ export default function App() {
         socket.off("new-messager", newMessagerHandler)
       }
     }
-  }, [socket, userData])
+  }, [socket, userReducer, chatReducer])
 
 
 
@@ -134,7 +132,7 @@ export default function App() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/auth/signup" element={<SignUp />} />
         <Route path="/auth/signin" element={<SignIn />} />
-        {(userData?._id && (Authorization && user?._id)) && (
+        {((userReducer?._id) && (Authorization && user?._id)) && (
           <>
             <Route path="/chats" element={<Home />} />
             <Route path="/chats/:chatspace_id" element={<Chat_space />} />

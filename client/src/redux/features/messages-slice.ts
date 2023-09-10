@@ -1,5 +1,7 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { Message } from "./chat-slice";
+import notificatioSound from "../../assets/whatssapp_web.mp3";
+import { store } from "../store";
 
 interface ChatspacesMessages {
   chatspace_id: string;
@@ -7,11 +9,11 @@ interface ChatspacesMessages {
 }
 
 const initialState: {
-  isInitialized: boolean
-  chatspacesMessages:ChatspacesMessages[]
+  isInitialized: boolean;
+  chatspacesMessages: ChatspacesMessages[];
 } = {
   isInitialized: false,
-  chatspacesMessages:[]
+  chatspacesMessages: [],
 };
 
 const slice = createSlice({
@@ -36,11 +38,10 @@ const slice = createSlice({
         const chatspace_index = state.chatspacesMessages.findIndex((c) => {
           return c.chatspace_id == action.payload.chatspace_id;
         });
-        console.log({ messagePayload: action.payload });
         if (chatspace_index < 0) return alert("Chat space not found!");
-        console.log({ payload: action.payload });
-        console.log({ ADDING_TO_MESSAGE: chatspace_index });
-        state.chatspacesMessages[chatspace_index].messages.push(action.payload.newMessage);
+        state.chatspacesMessages[chatspace_index].messages.push(
+          action.payload.newMessage
+        );
         return state;
       }
     },
@@ -60,11 +61,12 @@ const slice = createSlice({
       const chatspaceIndex = state.chatspacesMessages.findIndex(
         (c) => c.chatspace_id == chatspace_id
       );
-      const messageIndex = state.chatspacesMessages[chatspaceIndex].messages.findIndex(
-        (m) => m._id == tempId
-      );
+      const messageIndex = state.chatspacesMessages[
+        chatspaceIndex
+      ].messages.findIndex((m) => m._id == tempId);
       console.log({ messageIndex, chatspaceIndex, modifiedMessage });
-      state.chatspacesMessages[chatspaceIndex].messages[messageIndex] = modifiedMessage;
+      state.chatspacesMessages[chatspaceIndex].messages[messageIndex] =
+        modifiedMessage;
       return state;
     },
 
@@ -72,12 +74,16 @@ const slice = createSlice({
       const chatspaceIndex = state.chatspacesMessages.findIndex(
         (s) => s.chatspace_id == action.payload.chatspace_id
       );
-      const messageIndex = state.chatspacesMessages[chatspaceIndex].messages.findIndex(
-        (m) => m._id == action.payload.message_id
-      );
+      const messageIndex = state.chatspacesMessages[
+        chatspaceIndex
+      ].messages.findIndex((m) => m._id == action.payload.message_id);
       if (action.payload.deletedForEveryone) {
-        state.chatspacesMessages[chatspaceIndex].messages[messageIndex].content = "";
-        state.chatspacesMessages[chatspaceIndex].messages[messageIndex].deletedForEveryone = true;
+        state.chatspacesMessages[chatspaceIndex].messages[
+          messageIndex
+        ].content = "";
+        state.chatspacesMessages[chatspaceIndex].messages[
+          messageIndex
+        ].deletedForEveryone = true;
         return state;
       }
       state.chatspacesMessages[chatspaceIndex].messages.splice(messageIndex, 1);

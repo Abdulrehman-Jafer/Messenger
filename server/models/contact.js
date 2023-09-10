@@ -14,7 +14,8 @@ const schema = new Schema({
         saved_by:{
             type: Types.ObjectId,
             ref: "User",
-            required: true
+            index:true,
+            required: true,
         },
         public_number: {
             type: String,

@@ -1,5 +1,7 @@
 import User from "../models/user.js"
 import bcrypt from "bcrypt"
+import {returnResponse} from "../utils/response.js"
+import socket from "../configs/socket.io_config.js"
 
 export const createUser = async (req,res,next) => {
     const {name,password,email,provider} = req.body
@@ -34,6 +36,7 @@ export const createUser = async (req,res,next) => {
 
 export const authenticateUser = async (req,res,next) => {
     const {email,provider} = req.body
+    console.log("Authenticate User")
     try {
         const user = await User.findOne({email,provider})
         if(!user){
@@ -55,6 +58,7 @@ export const authenticateUser = async (req,res,next) => {
 }
 
 export const continueWithGoogle = async (req,res,next) => {
+    console.log("CONTINUING WITH GOOGLE")
             const { name,google_uid,image,email,provider } = req.body
             try {
                 const existingUser = await User.findOne({email,provider})
@@ -80,3 +84,19 @@ export const continueWithGoogle = async (req,res,next) => {
             }
         }
 
+
+export const blockUser = (req,res,next) => {
+ const {public_number,user_id} = req.body
+ try {
+    const blockedUser = User.findOne({public_number})
+    if(!blockedUser){
+        return returnResponse(res,404,"public_number don't exist",{public_number},false)
+    }
+    const updatedUser = User.findOne({_id:user_id},{blocked_user:[user_id]})
+    const io = socket.getIO()
+    io.to(blockedUser.socketId).emit("user_blocked",updatedUser.public_number)
+    return returnResponse(res,200,"user blocked successful",{updatedUser},true)
+ } catch (error) {
+    next(error)
+ }
+}

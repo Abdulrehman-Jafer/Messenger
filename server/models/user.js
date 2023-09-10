@@ -30,7 +30,7 @@ const schema = new Schema({
             return this.provider == "Google"
         }
     },
-    blockedContacts: [
+    blocked_user: [
         {
             type: Types.ObjectId,
             required: true

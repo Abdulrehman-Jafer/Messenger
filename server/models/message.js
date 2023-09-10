@@ -1,9 +1,12 @@
 import { Schema,model,Types } from "mongoose";
 
+// aggregation $project $match $group $sum
+
 const schema = new Schema({
         belongsTo: {
             type: Types.ObjectId,
             ref: "ChatSpace",
+            index: true,
             required: true
         },
         contentType: {
@@ -44,4 +47,5 @@ const schema = new Schema({
         }
 },{timestamps:true})
 
-export default new model("Message",schema)
+const Message = new model("Message",schema)
+export default Message;

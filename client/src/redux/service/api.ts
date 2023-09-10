@@ -10,7 +10,7 @@ export const api = createApi({
     createUser: builder.mutation<any, any>({
       query(requestBody) {
         return {
-          url: "auth/signup",
+          url: "user/auth/signup",
           body: requestBody,
           method: "POST",
           headers: {
@@ -19,29 +19,31 @@ export const api = createApi({
         };
       },
     }),
+
     singIn: builder.mutation<any, any>({
       query(requestBody) {
         return {
-          url: "auth/signin",
+          url: "user/auth/signin",
           body: requestBody,
           method: "POST",
         };
       },
-      // transformResponse: (res) => ,
     }),
+
     continueWithGoogle: builder.mutation<any, any>({
       query(requestBody) {
         return {
-          url: "auth/continue-with-google",
+          url: "user/auth/continue-with-google",
           body: requestBody,
-          method: "POST",
+          method: "PUT",
         };
       },
     }),
+
     validate: builder.query<any, any>({
       query: ({ authorization, User_id }) => {
         return {
-          url: "auth/validate-token",
+          url: "user/auth/validate-token",
           headers: {
             authorization,
             User_id,
@@ -49,6 +51,7 @@ export const api = createApi({
         };
       },
     }),
+
     getContacts: builder.query<any, any>({
       query: ({ user_id, authorization }) => {
         console.log(user_id);
@@ -61,6 +64,7 @@ export const api = createApi({
       },
       providesTags: ["Contacts"],
     }),
+
     createContact: builder.mutation<any, any>({
       query(requestBody) {
         return {
@@ -71,6 +75,7 @@ export const api = createApi({
       },
       invalidatesTags: ["Contacts"],
     }),
+
     getChatspaces: builder.query<any, any>({
       query: ({ user_id, authorization }) => {
         return {
@@ -82,6 +87,7 @@ export const api = createApi({
       },
       providesTags: ["Chats", "Messages"],
     }),
+
     createChat: builder.mutation<any, any>({
       query: (requsetBody) => {
         return {
@@ -165,12 +171,33 @@ export const api = createApi({
     addToArchive: builder.mutation<any, any>({
       query: (requestBody) => {
         return {
-          url: "chatspace/add/archive",
-          method: "POST",
+          url: "chatspace/archive/add",
+          method: "PUT",
           body: requestBody,
         };
       },
       invalidatesTags: ["Chats"],
+    }),
+
+    removeFromArchive: builder.mutation<any, any>({
+      query: (requestBody) => {
+        return {
+          url: "chatspace/archive/remove",
+          method: "PUT",
+          body: requestBody,
+        };
+      },
+      invalidatesTags: ["Chats"],
+    }),
+
+    blockUser: builder.mutation<any, any>({
+      query: (requestBody) => {
+        return {
+          url: "user/block",
+          method: "PUT",
+          body: requestBody,
+        };
+      },
     }),
   }),
 });
@@ -191,6 +218,8 @@ export const {
   useSendAttachmentMessageMutation,
   useDeleteChatspaceMutation,
   useAddToArchiveMutation,
+  useRemoveFromArchiveMutation,
+  useBlockUserMutation,
 } = api;
 
 export default api;

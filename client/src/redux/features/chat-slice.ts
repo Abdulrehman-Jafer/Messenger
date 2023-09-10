@@ -31,15 +31,16 @@ export interface ChatSpace {
     isSaved: boolean;
   };
   isArchived: boolean;
+  isBlocked?: boolean;
   _id: string;
 }
 
 const initialState: {
-  isInitialized: boolean,
-  chats:ChatSpace[]
+  isInitialized: boolean;
+  chats: ChatSpace[];
 } = {
-isInitialized:false,
-chats: []
+  isInitialized: false,
+  chats: [],
 };
 
 const slice = createSlice({
@@ -48,7 +49,7 @@ const slice = createSlice({
   reducers: {
     initializeChatSpace: function (state, action: PayloadAction<any>) {
       state.isInitialized = true;
-      state.chats = action.payload
+      state.chats = action.payload;
       return state;
     },
 
@@ -58,11 +59,13 @@ const slice = createSlice({
     },
 
     updateArchiveStatus: function (state, action: PayloadAction<any>) {
-      const { chatspace_id, isArchived } = action.payload;
+      const { chatspace_id, archive_status } = action.payload;
       const chatspace_index = state.chats.findIndex((s) => {
         return s._id == chatspace_id;
       });
-      state.chats[chatspace_index].isArchived = isArchived;
+      console.log({ chatspace_index, archive_status });
+      state.chats[chatspace_index].isArchived = archive_status;
+      console.log({ Update: state.chats[chatspace_index] });
       return state;
     },
 
@@ -83,7 +86,8 @@ const slice = createSlice({
       const chatspace_index = state.chats.findIndex((s) => {
         return s._id == chatspace_id;
       });
-      state.chats[chatspace_index].receiver.connected_to.isTyping = typingStatus;
+      state.chats[chatspace_index].receiver.connected_to.isTyping =
+        typingStatus;
       return state;
     },
 
@@ -98,7 +102,9 @@ const slice = createSlice({
       if (chat_space_related_to_user == -1) return state;
       state.chats[chat_space_related_to_user].receiver.connected_to.socketId =
         action.payload.socketId;
-      state.chats[chat_space_related_to_user].receiver.connected_to.lastLogin = 0;
+      state.chats[
+        chat_space_related_to_user
+      ].receiver.connected_to.lastLogin = 0;
       // toast(
       //   `${
       //     state.chats[chat_space_related_to_user].receiver.isSaved

@@ -60,7 +60,7 @@ export default function SignIn() {
                     <Typography color="gray" className="mt-4 text-center font-normal">
                         Don't have an account?{" "}
                         <span
-                            className="font-medium text-blue-500 transition-colors hover:text-blue-700"
+                            className="font-medium text-blue-500 transition-colors hover:text-blue-700 cursor-pointer"
                             onClick={() => navigate("/auth/signup")}
                         >
                             Sign Up

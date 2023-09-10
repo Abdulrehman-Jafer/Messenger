@@ -9,11 +9,11 @@ export interface Contact {
   public_number: string;
 }
 const initialState: {
-  isInitialized: boolean,
-  contacts:Contact[]
+  isInitialized: boolean;
+  contacts: Contact[];
 } = {
   isInitialized: false,
-  contacts:[]
+  contacts: [],
 };
 
 const Slice = createSlice({
@@ -22,7 +22,7 @@ const Slice = createSlice({
   reducers: {
     initializeContacts: (state, action) => {
       state.isInitialized = true;
-      state.contacts = action.payload
+      state.contacts = action.payload;
       return state;
     },
 

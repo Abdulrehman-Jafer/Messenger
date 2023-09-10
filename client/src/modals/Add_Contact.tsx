@@ -5,6 +5,8 @@ import { onChangeHandler } from '../utils/misc';
 import api, { useCreateContactMutation } from '../redux/service/api';
 import { toast } from 'react-hot-toast';
 import { useAppDispatch } from '../redux/store';
+import { addToContacts } from '../redux/features/contact-slice';
+import { updateContactInfo } from '../redux/features/chat-slice';
 
 const Add_Contact = ({ isModalOpen, setIsModalOpen, user_id, providedPublicNumber }: { isModalOpen: boolean, setIsModalOpen: Dispatch<SetStateAction<boolean>>, user_id: string, providedPublicNumber?: string }) => {
     const [fields, setFields] = useState<Record<string, any>>({
@@ -18,7 +20,7 @@ const Add_Contact = ({ isModalOpen, setIsModalOpen, user_id, providedPublicNumbe
         setFields(prev => ({ ...prev, public_number: providedPublicNumber }))
     }, [])
 
-    const [createContact, { isError, isLoading, isSuccess, error }] = useCreateContactMutation()
+    const [createContact, { isError, isLoading, isSuccess, error, data }] = useCreateContactMutation()
 
     useEffect(() => {
         let loaderId;
@@ -30,7 +32,8 @@ const Add_Contact = ({ isModalOpen, setIsModalOpen, user_id, providedPublicNumbe
             isSuccess ? toast.success(`${fields.saved_as} added to the contacts`) : toast.error((error as any)?.data?.message || "Failed to Complete")
             if (isSuccess) {
                 setIsModalOpen(false)
-                dispatch(api.util.resetApiState())
+                dispatch(addToContacts(data.result))
+                dispatch(updateContactInfo(data.result))
             }
         }
     }, [isLoading])

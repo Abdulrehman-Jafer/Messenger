@@ -4,25 +4,12 @@ import Chatspace from "../models/chatspace.js";
 
 //(Validation)
 import socketIo_config from "../configs/socket.io_config.js";
+import { returnResponse } from "../utils/response.js";
 
 
 export const sendMessage = async (req,res,next) => {
     const {data,messageFrom} = req.body;
-    console.log({data})
     try {
-        const chatspace = await Chatspace.findOne({
-            _id: data.belongsTo,
-            between: {$in : [data.sender._id]}
-        })
-        if(!chatspace){
-            return res.status(404).json({
-                responseCode: 404,
-                responseText: "Chatspace does not exist",
-                requestBody: {
-                    sender_id:data.sender._id, chatspace_id: data.belongsTo
-                }
-            })
-        }
             const message = new Message({
                 belongsTo: data.belongsTo,
                 content: data.content,
@@ -38,17 +25,9 @@ export const sendMessage = async (req,res,next) => {
        const io = socketIo_config.getIO()
        const modifiedMessage = {...savedMessage._doc,sender: data.sender}
             if(data.receiver.socketId){
-                console.log({receiverSocketId: data.receiver.socketId})
-                console.log({receiver: data.receiver})
                 io.to(data.receiver.socketId).emit("receive-message",{message:modifiedMessage,messageFrom})
             }
-        return res.status(201).json({
-            responseCode: 201,
-            responseText: "Message sent successfully",
-            result : {
-                sentMessage : modifiedMessage
-            }
-        })
+        return returnResponse(res,201,"Message sent successfully",{sentMessage:modifiedMessage},true)
     } catch (error) {
         next(error)
     }

@@ -171,7 +171,7 @@ export default function Chat_space() {
                     <h2 className="text-[1.3rem]">
                         {messageFrom}
                     </h2>
-                    <small className="text-pink-red">
+                    <small className={`${chatspace.receiver.connected_to.lastLogin == 0 ? "text-pink-red" : "text-gray-500"}`}>
                         {chatspace.receiver.connected_to.lastLogin == 0
                             ? "online"
                             : "offline"}

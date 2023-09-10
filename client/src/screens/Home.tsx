@@ -103,6 +103,7 @@ export default function Home() {
                                         user_image={c.receiver.connected_to.image}
                                         chatspace_id={c._id}
                                         key={c._id}
+                                        isTyping={c.receiver.connected_to.isTyping}
                                         isSaved={c.receiver.isSaved}
                                         isArchived={c.isArchived}
                                         user_id={User._id} />)

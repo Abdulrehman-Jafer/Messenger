@@ -7,7 +7,108 @@ import { returnResponse } from "../utils/response.js";
 
 export const getUserChatSpace = async (req, res, next) => {
   const { user_id } = req.params;
-  try {
+  try { //aggregate match user_id 
+    // after aggregation Patients.populate(result, {path: "patient"}, callback);
+    // actually no $lookup for left outer joining the other collection
+
+  //   {
+  //     $lookup:
+  //       {
+  //         from: <collection to join>,
+  //         localField: <field from the input documents>,
+  //         foreignField: <field from the documents of the "from" collection>,
+  //         as: <output array field>
+  //       }
+  //  }
+
+  // const pipeline = [
+  //   // Match Chatspaces based on the conditions
+  //   {
+  //     $match: {
+  //       between: { $in: [user_id] },
+  //       deletedFor: { $nin: [user_id] },
+  //     },
+  //   },
+  //   // Populate "between" field with User documents
+  //   {
+  //     $lookup: {
+  //       from: "User",
+  //       localField: "between",
+  //       foreignField: "_id",
+  //       as: "between",
+  //     },
+  //   },
+  //   // Sort the Chatspaces by updatedAt in descending order
+  //   {
+  //     $sort: { updatedAt: -1 },
+  //   },
+  //   // Replace between with the sender and receiver objects
+  //   {
+  //     $addFields: {
+  //       sender: {
+  //         $arrayElemAt: [
+  //           {
+  //             $filter: {
+  //               input: "$between",
+  //               cond: { $eq: ["$$this._id", user_id] },
+  //             },
+  //           },
+  //           0,
+  //         ],
+  //       },
+  //       receiver: {
+  //         $arrayElemAt: [
+  //           {
+  //             $filter: {
+  //               input: "$between",
+  //               cond: { $ne: ["$$this._id", user_id] },
+  //             },
+  //           },
+  //           0,
+  //         ],
+  //       },
+  //     },
+  //   },
+  //   // Lookup userContacts
+  //   {
+  //     $lookup: {
+  //       from: "Contact",
+  //       localField: "receiver._id",
+  //       foreignField: "contact",
+  //       as: "contact",
+  //     },
+  //   },
+  //   // Add additional fields
+  //   {
+  //     $addFields: {
+  //       contact: {
+  //         $arrayElemAt: ["$contact", 0],
+  //       },
+  //       isSaved: {
+  //         $cond: {
+  //           if: { $ne: ["$contact", null] },
+  //           then: true,
+  //           else: false,
+  //         },
+  //       },
+  //       isArchived: {
+  //         $in: [user_id, "$archived_for"],
+  //       },
+  //     },
+  //   },
+  //   // Project the final output
+  //   {
+  //     $project: {
+  //       sender: 1,
+  //       receiver: 1,
+  //       _id: 1,
+  //       isArchived: 1,
+  //     },
+  //   },
+  // ];
+  
+  // const modifiedChatSpaces = await Chatspace.aggregate(pipeline);
+  
     const chatspaces = await Chatspace.find({
       between: { $in: [user_id] },deletedFor:{$nin:[user_id]}
     })
@@ -152,7 +253,7 @@ export const createChatSpace = async (req, res, next) => {
     } else {
       return res.status(201).json({
         responseCode: 201,
-        responseMessage: "Created a new ChatSpace",
+        responseMessage: "Created new chatspace",
         result: {
           chatspace: modifiedChatspace,
           message:modifiedMessage
@@ -171,7 +272,7 @@ export const getAllChatspaceMessages = async (req, res, next) => {
   for (let i = 0; i < chatspaces.length; i++) {
     const totalMessages = await Message.countDocuments({
       belongsTo: chatspaces[i],
-    });
+    }); //.explain("executionStats")
     const skipCount = Math.max(totalMessages - 20, 0);
     const messages = await Message.find({
       belongsTo: chatspaces[i],
@@ -189,7 +290,7 @@ export const getAllChatspaceMessages = async (req, res, next) => {
   }
   return res.status(200).json({
     responseCode: 200,
-    responseMessage: "Fetched chatSpace successfully",
+    responseMessage: "Fetched all messages",
     result: allChatspaceMessages,
   });
 };
@@ -201,7 +302,7 @@ export const deleteAllMessageOfAChatSpace = async (req,res,next) => {
      await Chatspace.updateOne({_id: chatspace_id},{$pull:{archived_for:user_id}})
      return res.status(200).json({
        responseCode: 200,
-       responseMessage: "Fetched chatSpace successfully",
+       responseMessage: "deleted chatspace",
        result: {
          updates,
         },
@@ -218,7 +319,7 @@ export const addToArchive = async (req,res,next) => {
     if(!updatedChatspace){
       return res.status(404).json({
         responseCode: 404,
-        responseMessage: "Could not found Chatspace",
+        responseMessage: "Could not found chatspace",
         body: {
           chatspace_id,
           user_id
@@ -228,6 +329,28 @@ export const addToArchive = async (req,res,next) => {
     return returnResponse(res,200,"successfully added to archive",{updatedChatspace})
   } catch (error) {
     error.location = "controllers/chatspace/addToArchive"
+    next(error)
+  }
+}
+
+export const removeFromArchive = async (req,res,next) => {
+  const {chatspace_id,user_id} = req.body
+  try {
+    const updatedChatspace = await Chatspace.findOneAndUpdate({_id:chatspace_id},{$pull:{archived_for:user_id}},{new:true})
+    console.log({updatedChatspace})
+    if(!updatedChatspace){
+      return res.status(404).json({
+        responseCode: 404,
+        responseMessage: "Could not found chatspace",
+        body: {
+          chatspace_id,
+          user_id
+         },
+      })
+    }
+    return returnResponse(res,200,"removed from archive",{updatedChatspace})
+  } catch (error) {
+    error.location = "controllers/chatspace/removeFromArchive"
     next(error)
   }
 }

@@ -29,6 +29,7 @@ export default function Auth() {
                 dispatch(initializeUser({ ...data.user, userToken: data.token, lastLogin: 0 }))
                 navigate("/chats")
             } else {
+                console.log(error)
                 toast.error((error as Error)?.message || "Could not Sign In")
             }
         }
