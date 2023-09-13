@@ -84,11 +84,11 @@ export const deleteForMe = async (req,res,next) => {
 }
 
 export const deleteForEveryone = async (req,res,next) => {
-    const {message_id,chatspace_id} = req.body;
+    const {message_id,chatspace_id,receiverSocketId} = req.body;
     try {
         const deletedForEveryone = await Message.findOneAndUpdate({_id: message_id},{content: "",deletedForEveryone:true},{new: true})
         const io = socketIo_config.getIO()
-        io.to(data.receiverSocketId).emit("messageDeletedForEveryone",{chatspace_id,message_id})
+        io.to(receiverSocketId).emit("messageDeletedForEveryone",{chatspace_id,message_id})
         return res.status(200).json({
             responseCode: 200,
             responseText: "Message deleted successfully",

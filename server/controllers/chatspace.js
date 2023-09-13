@@ -130,18 +130,19 @@ export const getUserChatSpace = async (req, res, next) => {
         isSaved: savedContact ? true : false,
       };
       const sender = c.between.find((c) => c._id.equals(user_id));
-      const isBlocked = sender.blocked_user.includes(receiver.connected_to._id)
-      if(isBlocked){
-        delete receiver.connected_to.image
-        delete receiver.connected_to.lastLogin
+      const isBlockedByReceiver = sender.blocked_by.includes(receiver.connected_to.public_number)
+      if(isBlockedByReceiver){
+        receiver.connected_to.image = ""
+        receiver.connected_to.lastLogin = 999; //someHow Projecting these two feilds
       }
-      console.log({isBlocked})
+      console.log({isBlockedByReceiver})
       const isArchived = c.archived_for.includes(user_id)
       return {
         sender,
         receiver: receiver,
         _id: c._id,
-        isArchived
+        isArchived,
+        isBlockedByReceiver
       };
     });
 
@@ -199,12 +200,14 @@ export const createChatSpace = async (req, res, next) => {
       });
       await newChatspace.save();
     }
+    const isBlocked = sender.blocked_by.includes(receiver.connected_to.public_number)
     const modifiedChatspace = {
       _id: newChatspace._id,
       sender,
       receiver,
+      isArchived: false,
+      isBlockedByReceiver: isBlocked
     };
-    
     const message = new Message({
       belongsTo: newChatspace._id,
       content: textMessage,
@@ -213,7 +216,7 @@ export const createChatSpace = async (req, res, next) => {
       receiver: receiver.connected_to._id,
       createdAt:new Date().toString(),
       status: 1,
-      deletedFor: [],
+      deletedFor: isBlocked ? [receiver.connected_to._id] : [],
       deletedForEveryone:false
     })
     
@@ -239,14 +242,17 @@ export const createChatSpace = async (req, res, next) => {
       _id: newChatspace._id,
       sender:io_sender,
       receiver:io_receiver,
+      isArchived: false,
+      isBlockedByReceiver: isBlocked
     }
-    if(doesExist){
-      const messageFrom = io_receiver.isSaved ? io_receiver.contact.saved_as : io_receiver.connected_to.public_number
-      io.to(receiver.connected_to.socketId).emit("receive-message",{message:modifiedMessage,messageFrom})
-    } else {
-      io.to(receiver.connected_to.socketId).emit("new-messager",{chatspace:ioChatSpace,message:modifiedMessage})
+    if(!isBlocked){
+      if(doesExist){
+        const messageFrom = io_receiver.isSaved ? io_receiver.contact.saved_as : io_receiver.connected_to.public_number
+        io.to(receiver.connected_to.socketId).emit("receive-message",{message:modifiedMessage,messageFrom})
+      } else {
+        io.to(receiver.connected_to.socketId).emit("new-messager",{chatspace:ioChatSpace,message:modifiedMessage})
+      }
     }
-
     if(doesExist){
       return res.status(200).json({
         responseCode: 200,

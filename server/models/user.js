@@ -32,10 +32,12 @@ const schema = new Schema({
     },
     blocked_user: [
         {
-            type: Types.ObjectId,
-            required: true
-        }
-    ],
+            type: String,
+        }],
+    blocked_by: [
+        {
+        type:String
+    }],
     lastLogin: {
       type:  Number,
       default: 0

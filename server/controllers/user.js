@@ -82,21 +82,26 @@ export const continueWithGoogle = async (req,res,next) => {
             } catch (error) {
                return next(error)
             }
-        }
-
-
-export const blockUser = (req,res,next) => {
- const {public_number,user_id} = req.body
- try {
-    const blockedUser = User.findOne({public_number})
-    if(!blockedUser){
-        return returnResponse(res,404,"public_number don't exist",{public_number},false)
     }
-    const updatedUser = User.findOne({_id:user_id},{blocked_user:[user_id]})
+
+
+export const add_to_block_list = async (req,res,next) => {
+ const {public_number,user_id,user_public_number} = req.body
+ console.log("AT BLOCK USER",req.body)
+ try {
+    const blockedUser = await User.findOneAndUpdate({public_number},{$push:{blocked_by:user_public_number}})
+    if(!blockedUser){
+        return returnResponse(res,404,"public_number doesn't exist",{public_number},false)
+    }
+    const updatedUser = await User.findOneAndUpdate({_id:user_id},{$push:{blocked_user:public_number}},{new:true})
     const io = socket.getIO()
     io.to(blockedUser.socketId).emit("user_blocked",updatedUser.public_number)
-    return returnResponse(res,200,"user blocked successful",{updatedUser},true)
+    return returnResponse(res,200,"User has been blocked",updatedUser,true)
  } catch (error) {
     next(error)
  }
+}
+
+export const  remove_from_black_list = async () => {
+    
 }

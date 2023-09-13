@@ -20,7 +20,7 @@ export default {
         io.on("connection",(socket)=>{
 
         socket.on("disconnect",async ()=>{
-            await User.updateOne({socketId: socket.id},{socketId: "",lastLogin: Date.now()},{new: true})
+            await User.findOneAndUpdate({socketId: socket.id},{socketId: "",lastLogin: Date.now()},{new: true})
             socket.broadcast.emit("user-offline",socket.id)
         })
 
@@ -32,7 +32,7 @@ export default {
 
          socket.on("typingStatus",(data)=>{
             // console.log(data)
-            socket.to(data.receiverSocketId).emit("updateTypingStatus",{chatspace_id:data.chatspace_id, typingStatus: data.typingStatus})
+            socket.to(data.receiverSocketId).emit("updateTypingStatus",{chatspace_id:data.chatspace_id, typingStatus: data.typingStatus,public_number:data.typer_public_number})
         })
 
             socket.on("sendFile",async (data) => {

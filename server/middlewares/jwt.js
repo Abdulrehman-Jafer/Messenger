@@ -1,5 +1,7 @@
 import jwt from "jsonwebtoken"
 import dotenv from "dotenv"
+import User from "../models/user.js"
+import { returnResponse } from "../utils/response.js"
 
 dotenv.config()
 
@@ -12,17 +14,13 @@ export const createToken = (req,res,next) => {
     })
 }
 
-export const validateToken = (req,res,next) => {
-    const token = req.get("Authorization")
-    const user_id = req.get("User_id")
+export const validateToken = async (req,res,next) => {
+    const token = req.get("authorization")
+    const user_id = req.query.user_id
     const json = jwt.verify(token,process.env.SECRET)
     if(json._id == user_id){
-        return res.status(200).json({
-            message:"Validation Successful",
-            user: json
-        })
+        const user = await User.findOne({_id:user_id})
+        return returnResponse(res,200,"Validation successful",user,true)
     }
-    return res.status(401).json({
-        message: "Unauthorized",    
-    })
+    return returnResponse(res,403,"Validation failed",{token,user_id},false)
 }

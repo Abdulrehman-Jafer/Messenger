@@ -27,10 +27,10 @@ export const whetherChatspaceExist = async (req,res,next) => {
 export const checkWhetherUserBlocked = async (req,res,next) => {
     const {data} = req.body;
      try {
-            const isBlockedBySender = await User.exists({_id:data.sender._id,blocked_user:{$in:[data.receiver]}})
+            const isBlockedBySender = await User.exists({_id:data.sender._id,blocked_user:{$in:[data.receiver.public_number]}})
             if(isBlockedBySender)  return returnResponse(res,401,"Unblock the user to chat",data,false)
-            const isBlockedByReceiver = await User.exists({_id: data.receiver,blocked_user:{$in:[data.sender._id]}})
-            console.log({isBlockedByReceiver,isBlockedBySender})
+            const isBlockedByReceiver = await User.exists({_id: data.receiver._id,blocked_user:{$in:[data.sender.public_number]}})
+            console.log({isBlockedByReceiver,isBlockedBySender,receiverId:data.receiver._id})
             if(!isBlockedByReceiver) return next();
             const message = new Message({
                  belongsTo: data.belongsTo,
