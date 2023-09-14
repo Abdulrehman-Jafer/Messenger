@@ -131,10 +131,6 @@ export const getUserChatSpace = async (req, res, next) => {
       };
       const sender = c.between.find((c) => c._id.equals(user_id));
       const isBlockedByReceiver = sender.blocked_by.includes(receiver.connected_to.public_number)
-      if(isBlockedByReceiver){
-        receiver.connected_to.image = ""
-        receiver.connected_to.lastLogin = 999; //someHow Projecting these two feilds
-      }
       console.log({isBlockedByReceiver})
       const isArchived = c.archived_for.includes(user_id)
       return {

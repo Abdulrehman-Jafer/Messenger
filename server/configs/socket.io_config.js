@@ -31,7 +31,6 @@ export default {
          })
 
          socket.on("typingStatus",(data)=>{
-            // console.log(data)
             socket.to(data.receiverSocketId).emit("updateTypingStatus",{chatspace_id:data.chatspace_id, typingStatus: data.typingStatus,public_number:data.typer_public_number})
         })
 

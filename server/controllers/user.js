@@ -3,6 +3,14 @@ import bcrypt from "bcrypt"
 import {returnResponse} from "../utils/response.js"
 import socket from "../configs/socket.io_config.js"
 
+
+/**
+ * 
+ * @param {Request} req 
+ * @param {Response} res 
+ * @returns
+ */
+
 export const createUser = async (req,res,next) => {
     const {name,password,email,provider} = req.body
     try {
@@ -34,6 +42,13 @@ export const createUser = async (req,res,next) => {
     }
 }
 
+/**
+ * 
+ * @param {Request} req 
+ * @param {Response} res 
+ * @returns
+ */
+
 export const authenticateUser = async (req,res,next) => {
     const {email,provider} = req.body
     console.log("Authenticate User")
@@ -56,6 +71,13 @@ export const authenticateUser = async (req,res,next) => {
         return next(error)
     }
 }
+
+/**
+ * 
+ * @param {Request} req 
+ * @param {Response} res 
+ * @returns
+ */
 
 export const continueWithGoogle = async (req,res,next) => {
     console.log("CONTINUING WITH GOOGLE")
@@ -85,6 +107,13 @@ export const continueWithGoogle = async (req,res,next) => {
     }
 
 
+/**
+ * 
+ * @param {Request} req 
+ * @param {Response} res 
+ * @returns
+ */
+
 export const add_to_block_list = async (req,res,next) => {
  const {public_number,user_id,user_public_number} = req.body
  console.log("AT BLOCK USER",req.body)
@@ -102,6 +131,27 @@ export const add_to_block_list = async (req,res,next) => {
  }
 }
 
-export const  remove_from_black_list = async () => {
-    
+
+/**
+ * 
+ * @param {Request} req 
+ * @param {Response} res 
+ * @returns
+ */
+
+export const  remove_from_black_list = async (req,res) => {
+    const {public_number,user_id,user_public_number} = req.body
+    console.log("AT UnBLOCK USER",req.body)
+    try {
+       const blockedUser = await User.findOneAndUpdate({public_number},{$pull:{blocked_by:user_public_number}})
+       if(!blockedUser){
+           return returnResponse(res,404,"public_number doesn't exist",{public_number},false)
+       }
+       const updatedUser = await User.findOneAndUpdate({_id:user_id},{$pull:{blocked_user:public_number}},{new:true})
+       const io = socket.getIO()
+       io.to(blockedUser.socketId).emit("user_unblocked",updatedUser.public_number)
+       return returnResponse(res,200,"User has been unblocked",updatedUser,true)
+    } catch (error) {
+       next(error)
+    }
 }

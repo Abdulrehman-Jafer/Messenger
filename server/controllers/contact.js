@@ -1,20 +1,22 @@
 import Contact from "../models/contact.js"
 import User from "../models/user.js"
 
+
+/**
+ * 
+ * @param {Request} req 
+ * @param {Response} res 
+ * @returns
+ */
+
 const getContacts = async (req,res,next) => {
     try {
         const { user_id } = req.params;
         const user = await User.findOne({_id:user_id})
         const contacts = await Contact.find({saved_by:user_id}).populate("contact").sort({"contact.lastLogin": 1}).exec()
-        const modifiedContacts = []
-        contacts.map((c)=>{
-            const isBlockedByContact = user.blocked_by.includes(c.public_number)
-            if(isBlockedByContact) {
-               c.contact.image = ""
-               c.contact.lastLogin = 999
-            }
-            c.isBlocked
-            modifiedContacts.push(c)
+        const modifiedContacts = contacts.map((c)=>{
+            const isBlockedByReceiver = user.blocked_by.includes(c.public_number)
+            return {...c._doc,isBlockedByReceiver};
         })
         return res.status(200).json({
             responseCode: 200,
@@ -27,6 +29,14 @@ const getContacts = async (req,res,next) => {
         next(error)
     }
 }
+
+
+/**
+ * 
+ * @param {Request} req 
+ * @param {Response} res 
+ * @returns
+ */
 
 const createContact = async (req,res,next) => {
   try {
