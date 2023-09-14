@@ -31,7 +31,7 @@ export interface ChatSpace {
     isSaved: boolean;
   };
   isArchived: boolean;
-  isBlocked?: boolean;
+  isBlockedByReceiver: boolean;
   _id: string;
 }
 
@@ -82,7 +82,6 @@ const slice = createSlice({
 
     updateTypingStaus: function (state, action: PayloadAction<any>) {
       const { chatspace_id, typingStatus } = action.payload;
-      console.log({ payload: action.payload });
       const chatspace_index = state.chats.findIndex((s) => {
         return s._id == chatspace_id;
       });
@@ -105,14 +104,6 @@ const slice = createSlice({
       state.chats[
         chat_space_related_to_user
       ].receiver.connected_to.lastLogin = 0;
-      // toast(
-      //   `${
-      //     state.chats[chat_space_related_to_user].receiver.isSaved
-      //       ? state.chats[chat_space_related_to_user].receiver.contact.saved_as
-      //       : state.chats[chat_space_related_to_user].receiver.connected_to
-      //           .public_number
-      //   } is Online `
-      // );
       return state;
     },
 
@@ -127,17 +118,23 @@ const slice = createSlice({
       console.log({ OFFLINE: "DISPATCHING", chat_space_related_to_user });
       if (chat_space_related_to_user == -1) return state;
       state.chats[chat_space_related_to_user].receiver.connected_to.socketId =
-        action.payload;
+        "";
       state.chats[chat_space_related_to_user].receiver.connected_to.lastLogin =
         Date.now();
-      // toast(
-      //   `${
-      //     state.chats[chat_space_related_to_user].receiver.isSaved
-      //       ? state.chats[chat_space_related_to_user].receiver.contact.saved_as
-      //       : state.chats[chat_space_related_to_user].receiver.connected_to
-      //           .public_number
-      //   } is Offline`
-      // );
+      return state;
+    },
+
+    userBlockedHandler: function (state, action: PayloadAction<string>) {
+      const public_number = action.payload;
+      const chat_space_related_to_user = state.chats.findIndex(
+        (c) => c.receiver.connected_to.public_number == public_number
+      );
+      if (chat_space_related_to_user == -1) return state;
+      state.chats[chat_space_related_to_user].isBlockedByReceiver = true;
+      state.chats[chat_space_related_to_user].receiver.connected_to.image = "";
+      state.chats[
+        chat_space_related_to_user
+      ].receiver.connected_to.lastLogin = 999;
       return state;
     },
   },
@@ -151,5 +148,6 @@ export const {
   updateContactInfo,
   updateTypingStaus,
   updateArchiveStatus,
+  userBlockedHandler,
 } = slice.actions;
 export default slice.reducer;

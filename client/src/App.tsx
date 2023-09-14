@@ -11,47 +11,48 @@ import { getSessionStorage } from "./utils/sessionSorage"
 import { useNavigate } from "react-router-dom"
 // import { useValidateQuery } from "./redux/service/api"
 import { useTypedSelector, useAppDispatch } from "./redux/store"
-import { User, initializeUser, setUserSocketId } from "./redux/features/user-slice"
+import { User, addToBlockedBy, initializeUser, setUserSocketId } from "./redux/features/user-slice"
 // import PageNotFound from "./screens/404"
 import Contacts from "./screens/Contacts"
 import Contact_details from "./screens/Contact_details"
 import socket from "./socket-io/socket"
-import { addNewChat, updateTypingStaus, updateUserOfflineStatusInChatspace, updateUserOnlineStatusInChatspace } from "./redux/features/chat-slice"
+import { addNewChat, userBlockedHandler, updateTypingStaus, updateUserOfflineStatusInChatspace, updateUserOnlineStatusInChatspace } from "./redux/features/chat-slice"
 import { addMessagesInChatspace, deleteMessage, updateChatspaceMessage } from "./redux/features/messages-slice"
 import Settings from "./screens/Settings"
 import notificatioSound from "./assets/whatssapp_web.mp3";
-import { updateContactOfflineStatus, updateContactOnlineStatus } from "./redux/features/contact-slice"
+import { contactBlockHandler, updateContactOfflineStatus, updateContactOnlineStatus } from "./redux/features/contact-slice"
 import notficationSound from "./assets/whatssapp_web.mp3"
-
-
+import { useValidateTokenQuery } from "./redux/service/api"
+import useDispatchOnLoad from "./hooks/useDispatchOnLoad"
+import LoadingAnimation from "./animations/LoadingAnimation"
 
 
 export default function App() {
   const navigate = useNavigate()
-  const Authorization = getSessionStorage("authorization")
-  const user: Omit<User, "lastLogin"> = getSessionStorage("user")
+  const authorization = getSessionStorage("authorization")
+  const user_id: string = getSessionStorage("user_id")
   const userReducer = useTypedSelector((state) => state.userReducer)
   const chatReducer = useTypedSelector(state => state.chatReducer)
   const dispatch = useAppDispatch()
+  const [isLoading] = useDispatchOnLoad(useValidateTokenQuery, userReducer.isInitiailized, (user_id && authorization) ? { authorization, user_id } : undefined, initializeUser, "")
 
   useEffect(() => {
     if (userReducer?._id) {
       return navigate("/chats")
-    } else if (!userReducer?._id && (Authorization && user?._id)) {
-      dispatch(initializeUser({ ...user, userToken: Authorization, lastLogin: 0 }))
-      return navigate("/chats")
     } else {
       return navigate("/auth")
     }
-  }, [])
+  }, [userReducer])
 
   useEffect(() => {
 
     if (userReducer._id && chatReducer.isInitialized) {
 
-      function user_online_Handler(data: any) {
-        dispatch(updateUserOnlineStatusInChatspace({ onlineUser_id: data._id, socketId: data.socketId }))
-        dispatch(updateContactOnlineStatus(data))
+      function user_online_Handler(user: any) {
+        const isBlocked = userReducer.blocked_by.includes((user.public_number))
+        if (isBlocked) return;
+        dispatch(updateUserOnlineStatusInChatspace({ onlineUser_id: user._id, socketId: user.socketId }))
+        dispatch(updateContactOnlineStatus(user))
       }
 
       function socketIdHandler() {
@@ -81,14 +82,22 @@ export default function App() {
       }
 
       function user_offline_Handler(socketId: string) {
-        console.log("Offline User Socket Id", socket.id)
-        console.log({ socketId })
+        console.log("Offline User Socket Id", socketId)
         dispatch(updateUserOfflineStatusInChatspace(socketId))
         dispatch(updateContactOfflineStatus(socketId))
       }
 
-      function updateTypingStatus_handler(payload: any) {
-        dispatch(updateTypingStaus(payload))
+      function updateTypingStatus_handler(data: any) {
+        const isBlocked = userReducer.blocked_by.includes((data.public_number)) || userReducer.blocked_user.includes(data.public_number)
+        if (isBlocked) return;
+        dispatch(updateTypingStaus(data))
+      }
+
+      function onBlockHandler(public_number: string) {
+        console.log("USer blocked", public_number)
+        dispatch(addToBlockedBy(public_number))
+        dispatch(userBlockedHandler(public_number))
+        dispatch(contactBlockHandler(public_number))
       }
 
       function newMessagerHandler(data: any) {
@@ -110,6 +119,7 @@ export default function App() {
       socket.on("updateTypingStatus", updateTypingStatus_handler)
       socket.on("new-messager", newMessagerHandler)
       socket.on("user-offline", user_offline_Handler)
+      socket.on("user_blocked", onBlockHandler)
       return () => {
         // socket.disconnect()
         socket.off("set-socketId", socketIdHandler)
@@ -120,6 +130,7 @@ export default function App() {
         socket.off("updateTypingStatus", updateTypingStatus_handler)
         socket.off("user-offline", user_offline_Handler)
         socket.off("new-messager", newMessagerHandler)
+        socket.off("user_blocked", onBlockHandler)
       }
     }
   }, [socket, userReducer, chatReducer])
@@ -127,23 +138,29 @@ export default function App() {
 
 
   return (
-    <main>
-      <Toaster />
-      <Routes>
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/auth/signup" element={<SignUp />} />
-        <Route path="/auth/signin" element={<SignIn />} />
-        {((userReducer?._id) && (Authorization && user?._id)) && (
-          <>
-            <Route path="/chats" element={<Home />} />
-            <Route path="/chats/:chatspace_id" element={<Chat_space />} />
-            <Route path="/contacts" element={<Contacts />} />
-            <Route path="/contacts/:contact_id" element={<Contact_details />} />
-            <Route path="/settings" element={<Settings />} />
-          </>
-        )}
-        {/* <Route path="*" element={<PageNotFound />} /> */}
-      </Routes>
-    </main>
+    isLoading ? <div className="h-screen w-screen flex justify-center items-center">
+      <LoadingAnimation />
+    </div> :
+      <main>
+        <Toaster />
+        <Routes>
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/signup" element={<SignUp />} />
+          <Route path="/auth/signin" element={<SignIn />} />
+          {((userReducer?._id) && (authorization && user_id)) && (
+            <>
+              <Route path="/chats" element={<Home />} />
+              <Route path="/chats/:chatspace_id" element={<Chat_space />} />
+              <Route path="/contacts" element={<Contacts />} />
+              <Route path="/contacts/:contact_id" element={<Contact_details />} />
+              <Route path="/settings" element={<Settings />} />
+            </>
+          )}
+          {/* <Route path="*" element={<PageNotFound />} /> */}
+        </Routes>
+      </main>
   )
 }
+
+// addEventListener("online", function() { console. log("I am connected to the internet") })
+// window. addEventListener("offline", function() { console. log("Disconnected...so sad!!!") })

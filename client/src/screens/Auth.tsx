@@ -25,7 +25,7 @@ export default function Auth() {
             if (isSuccess) {
                 toast.success("Log In Successful")
                 setSessionStorage("authorization", data.token)
-                setSessionStorage("user", data.user)
+                setSessionStorage("user_id", data.user._id)
                 dispatch(initializeUser({ ...data.user, userToken: data.token, lastLogin: 0 }))
                 navigate("/chats")
             } else {

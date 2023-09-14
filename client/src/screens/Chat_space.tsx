@@ -45,7 +45,7 @@ export default function Chat_space() {
         socket.emit("typingStatus", {
             chatspace_id,
             typingStatus: isTyping && message.length > 0 ? true : false,
-            Typer: chatspace?.sender,
+            typer_public_number: chatspace?.sender.public_number,
             receiverSocketId: chatspace?.receiver.connected_to.socketId,
         });
     }, [isTyping, message]);

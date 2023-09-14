@@ -50,13 +50,12 @@ export const api = createApi({
       },
     }),
 
-    validate: builder.query<any, any>({
-      query: ({ authorization, User_id }) => {
+    validateToken: builder.query<any, any>({
+      query: ({ authorization, user_id }) => {
         return {
-          url: "user/auth/validate-token",
+          url: `user/auth/validate-token?user_id=${user_id}`,
           headers: {
             authorization,
-            User_id,
           },
         };
       },
@@ -205,7 +204,7 @@ export const api = createApi({
 export const {
   useCreateUserMutation,
   useSingInMutation,
-  useValidateQuery,
+  useValidateTokenQuery,
   useContinueWithGoogleMutation,
   useGetContactsQuery,
   useCreateContactMutation,

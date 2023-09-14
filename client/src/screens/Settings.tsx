@@ -24,10 +24,10 @@ export default function Settings() {
     const [onlineStatus, setOnlineStatus] = useState(false)
 
     const LogOut = () => {
-        setSessionStorage("user", "")
+        setSessionStorage("user_id", "")
         setSessionStorage("authorization", "")
         dispatch(UninitializeUser())
-        navigate("/auth/")
+        navigate("/auth")
     }
 
     const items: MenuItem[] = [

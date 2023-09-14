@@ -68,7 +68,7 @@ export default function Home() {
                             {contactsLoading ? <p>Loading Contact...</p> : <div className="flex gap-6 min-w-[200px] flex-shrink-0 items-center">
                                 {contactReducer.contacts.map(c => {
                                     return (
-                                        <RecentContact id={c.contact._id!} key={c.contact._id!} img={c.contact.image || "ass"} name={c.saved_as} lastLogin={c.contact.lastLogin} />
+                                        <RecentContact id={c.contact._id!} key={c.contact._id!} img={c.contact.image} name={c.saved_as} lastLogin={c.contact.lastLogin} />
                                     )
                                 })}
                                 {contactReducer.contacts.length == 0 && <p className="text-grayish">No saved contact found!</p>}

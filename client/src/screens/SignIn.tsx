@@ -12,6 +12,7 @@ export default function SignIn() {
     const navigate = useNavigate()
     const [fields, setFields] = useState({ email: "", password: "" })
     const [singIn, { isLoading, isError, isSuccess, error, data }] = useSingInMutation()
+    const [isUserLoading, setIsUserLoading] = useState(false)
     const dispatch = useAppDispatch()
 
     useEffect(() => {
@@ -24,7 +25,7 @@ export default function SignIn() {
             isSuccess ? toast.success("Logged In Successfully") : toast.error((error as Error)?.message || "Failed to Log In")
             if (isSuccess) {
                 setSessionStorage("authorization", data.token)
-                setSessionStorage("user", data.user)
+                setSessionStorage("user_id", data.user._id)
                 dispatch(initializeUser({ ...data.user, lastLogin: 0, userToken: data.token }))
                 navigate("/chats")
             }

@@ -1,7 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { Message } from "./chat-slice";
-import notificatioSound from "../../assets/whatssapp_web.mp3";
-import { store } from "../store";
 
 interface ChatspacesMessages {
   chatspace_id: string;

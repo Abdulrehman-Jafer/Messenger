@@ -41,13 +41,23 @@ const Slice = createSlice({
       return state;
     },
 
-    updateContactOfflineStatus: (state, action: PayloadAction<any>) => {
+    updateContactOfflineStatus: (state, action: PayloadAction<string>) => {
       const contactIndex = state.contacts.findIndex((c) => {
         return c.contact.socketId == action.payload;
       });
       if (contactIndex > -1) {
         state.contacts[contactIndex].contact.lastLogin = Date.now();
         state.contacts[contactIndex].contact.socketId = "";
+      }
+      return state;
+    },
+    contactBlockHandler: (state, action: PayloadAction<string>) => {
+      const contactIndex = state.contacts.findIndex((c) => {
+        return c.public_number == action.payload;
+      });
+      if (contactIndex > -1) {
+        state.contacts[contactIndex].contact.lastLogin = 999;
+        state.contacts[contactIndex].contact.image = "";
       }
       return state;
     },
@@ -59,5 +69,6 @@ export const {
   addToContacts,
   updateContactOnlineStatus,
   updateContactOfflineStatus,
+  contactBlockHandler,
 } = Slice.actions;
 export default Slice.reducer;

@@ -23,9 +23,9 @@ type Props = Partial<MessageType> & stylingData
 
 export default function Message({ _id, createdAt, belongsTo, content, sender, nextMsgSenderId, nextMsgTime, contentType, deletedForEveryone, status, receiverSocketId }: Props) {
 
-    const LoggedInUser = useTypedSelector(selector => selector.userReducer)
+    const userReducer = useTypedSelector(selector => selector.userReducer)
     const dispatch = useAppDispatch()
-    const isSentByLoggedInUser = (sender?._id == LoggedInUser._id)
+    const isSentByLoggedInUser = (sender?._id == userReducer._id)
     const marginBottom = sender?._id == nextMsgSenderId ? "mb-[0.8rem]" : "mb-[2.5rem]"
     const willShowTime = sender?._id !== nextMsgSenderId
     const messageRef = useRef<HTMLDivElement>(null);
@@ -43,16 +43,13 @@ export default function Message({ _id, createdAt, belongsTo, content, sender, ne
 
 
     const deleteFoMeHandler = async () => {
+        await deleteForMe({ message_id: _id, user_id: userReducer._id })
         dispatch(deleteMessage({ chatspace_id: belongsTo, message_id: _id }))
-        await deleteForMe({ message_id: _id, user_id: sender?._id })
     }
 
     const deleteForEveyoneHandler = async () => {
         dispatch(deleteMessage({ chatspace_id: belongsTo, message_id: _id, deletedForEveryone: true }))
-        await deleteForEveryone({ message_id: _id }).then(() => {
-            socket.emit("deleteMessageForEveryone", { receiverSocketId, chatspace_id: belongsTo, message_id: _id, deletedForEveryone: true })
-        })
-
+        await deleteForEveryone({ message_id: _id, receiverSocketId, chatspace_id: belongsTo })
     }
 
 
@@ -77,18 +74,23 @@ export default function Message({ _id, createdAt, belongsTo, content, sender, ne
 
     const render = () => {
         let toBeRender = <p className="italic">"could not load content"</p>
-        if (contentType == "text") {
+        if (deletedForEveryone) {
             toBeRender = (
-                <p className={`${deletedForEveryone ?
-                    "text-gray-500 italic bg-gray-300" :
-                    isSentByLoggedInUser ? "bg-pink-red text-white" :
-                        "bg-grayish text-blueish"} px-4 py-2 border-bottom-left max-w-[100%] cursor-default`
+                <p className="text-gray-500 italic bg-gray-300 px-4 py-2 border-bottom-left max-w-[100%] cursor-default"
+                >
+                    {deletedForEveryone ? "This message was deleted" : content}
+                </p>)
+        }
+        else if (contentType == "text") {
+            toBeRender = (
+                <p className={`${isSentByLoggedInUser ? "bg-pink-red text-white" :
+                    "bg-grayish text-blueish"} px-4 py-2 border-bottom-left max-w-[100%] cursor-default`
                 }>
                     {deletedForEveryone ? "This message was deleted" : content}
                 </p>)
         }
 
-        if (contentType == "video") {
+        else if (contentType == "video") {
             toBeRender = (
                 <div>
                     <video preload="none" poster={loadingImage} className={`chatVideoAspectRatio rounded-lg ${isSentByLoggedInUser && "float-right"}`} controls>
@@ -97,11 +99,11 @@ export default function Message({ _id, createdAt, belongsTo, content, sender, ne
                 </div>)
         }
 
-        if (contentType == "image") {
+        else if (contentType == "image") {
             toBeRender = <img src={`http://localhost:3000${content}`} alt="contentImage" className={`chatMediaWidth rounded-lg ${isSentByLoggedInUser && "self-end"}`} />
         }
 
-        if (contentType == "uploading") {
+        else if (contentType == "uploading") {
             toBeRender = <p className="italic">{content}</p>
         }
         return (
@@ -110,6 +112,8 @@ export default function Message({ _id, createdAt, belongsTo, content, sender, ne
             </Dropdown>
         )
     }
+
+    console.log()
 
     return (
         <section ref={messageRef} className={`flex items-center gap-2 ${isSentByLoggedInUser ? "justify-end" : "justify-start"} ${marginBottom}`}>
