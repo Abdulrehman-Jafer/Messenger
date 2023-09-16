@@ -13,7 +13,6 @@
 
 **Note**: Following To-do list is understandable me.It may be possible you will not be able to intercept the meaning of someof of the todos.
 ## To DO List
-- add the archive,delete,BlackList User Chat_space via Context Menu
 - add React emoji --- On the left side
 - Message typing should be a kind of a text area which will grow in height instead of growing
 - send a optional attachedText field with a message
