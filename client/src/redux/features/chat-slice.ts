@@ -63,9 +63,7 @@ const slice = createSlice({
       const chatspace_index = state.chats.findIndex((s) => {
         return s._id == chatspace_id;
       });
-      console.log({ chatspace_index, archive_status });
       state.chats[chatspace_index].isArchived = archive_status;
-      console.log({ Update: state.chats[chatspace_index] });
       return state;
     },
 
@@ -124,17 +122,22 @@ const slice = createSlice({
       return state;
     },
 
-    userBlockedHandler: function (state, action: PayloadAction<string>) {
+    chatBlockedHandler: function (state, action: PayloadAction<string>) {
       const public_number = action.payload;
       const chat_space_related_to_user = state.chats.findIndex(
         (c) => c.receiver.connected_to.public_number == public_number
       );
       if (chat_space_related_to_user == -1) return state;
       state.chats[chat_space_related_to_user].isBlockedByReceiver = true;
-      state.chats[chat_space_related_to_user].receiver.connected_to.image = "";
-      state.chats[
-        chat_space_related_to_user
-      ].receiver.connected_to.lastLogin = 999;
+      return state;
+    },
+    chatUnblockedHandler: function (state, action: PayloadAction<string>) {
+      const public_number = action.payload;
+      const chat_space_related_to_user = state.chats.findIndex(
+        (c) => c.receiver.connected_to.public_number == public_number
+      );
+      if (chat_space_related_to_user == -1) return state;
+      state.chats[chat_space_related_to_user].isBlockedByReceiver = false;
       return state;
     },
   },
@@ -145,9 +148,10 @@ export const {
   addNewChat,
   updateUserOnlineStatusInChatspace,
   updateUserOfflineStatusInChatspace,
+  chatUnblockedHandler,
   updateContactInfo,
   updateTypingStaus,
   updateArchiveStatus,
-  userBlockedHandler,
+  chatBlockedHandler,
 } = slice.actions;
 export default slice.reducer;

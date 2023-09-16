@@ -7,6 +7,7 @@ export interface Contact {
   saved_as: string;
   saved_by: string;
   public_number: string;
+  isBlockedByReceiver: boolean;
 }
 const initialState: {
   isInitialized: boolean;
@@ -23,6 +24,7 @@ const Slice = createSlice({
     initializeContacts: (state, action) => {
       state.isInitialized = true;
       state.contacts = action.payload;
+      console.log({ payload: action.payload });
       return state;
     },
 
@@ -55,10 +57,14 @@ const Slice = createSlice({
       const contactIndex = state.contacts.findIndex((c) => {
         return c.public_number == action.payload;
       });
-      if (contactIndex > -1) {
-        state.contacts[contactIndex].contact.lastLogin = 999;
-        state.contacts[contactIndex].contact.image = "";
-      }
+      state.contacts[contactIndex].isBlockedByReceiver = true;
+      return state;
+    },
+    contactUnblockHandler: (state, action: PayloadAction<string>) => {
+      const contactIndex = state.contacts.findIndex((c) => {
+        return c.public_number == action.payload;
+      });
+      state.contacts[contactIndex].isBlockedByReceiver = false;
       return state;
     },
   },
@@ -70,5 +76,6 @@ export const {
   updateContactOnlineStatus,
   updateContactOfflineStatus,
   contactBlockHandler,
+  contactUnblockHandler,
 } = Slice.actions;
 export default Slice.reducer;

@@ -68,7 +68,14 @@ export default function Home() {
                             {contactsLoading ? <p>Loading Contact...</p> : <div className="flex gap-6 min-w-[200px] flex-shrink-0 items-center">
                                 {contactReducer.contacts.map(c => {
                                     return (
-                                        <RecentContact id={c.contact._id!} key={c.contact._id!} img={c.contact.image} name={c.saved_as} lastLogin={c.contact.lastLogin} />
+                                        <RecentContact
+                                            key={c.contact._id!}
+                                            id={c.contact._id!}
+                                            img={c.contact.image!}
+                                            name={c.saved_as}
+                                            lastLogin={c.contact.lastLogin}
+                                            isBlockedByReceiver={c.isBlockedByReceiver}
+                                        />
                                     )
                                 })}
                                 {contactReducer.contacts.length == 0 && <p className="text-grayish">No saved contact found!</p>}
@@ -107,7 +114,9 @@ export default function Home() {
                                         isSaved={c.receiver.isSaved}
                                         isArchived={c.isArchived}
                                         connected_to_public_number={c.receiver.connected_to.public_number}
-                                        user_id={User._id} />)
+                                        user_id={User._id}
+                                        isBlockedByReceiver={c.isBlockedByReceiver}
+                                    />)
                             }) :
                                 <div className="flex flex-col items-center justify-center chatList-min-height">
                                     {chatFilter ?

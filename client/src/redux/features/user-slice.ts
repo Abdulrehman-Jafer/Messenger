@@ -44,29 +44,29 @@ const userSlice = createSlice({
     setUserSocketId: function (state, action: PayloadAction<string>) {
       return { ...state, socketId: action.payload };
     },
-    addToBlockedUser: function (state, action: PayloadAction<string>) {
-      state.blocked_user.push(action.payload);
+    add_to_blocked_User: function (state, action: PayloadAction<string>) {
+      state.blocked_user = [...state.blocked_user, action.payload];
       return state;
     },
-    removeFromBlockedUser: function (state, action: PayloadAction<string>) {
-      state.blocked_user.forEach((pn, index) => {
-        if (pn == action.payload) {
-          state.blocked_user.splice(index, 1);
-        }
-      });
+    add_to_blocked_By: function (state, action: PayloadAction<string>) {
+      state.blocked_by = [...state.blocked_by, action.payload];
       return state;
     },
-    addToBlockedBy: function (state, action: PayloadAction<string>) {
-      state.blocked_by.push(action.payload);
+    remove_from_blocked_User: function (state, action: PayloadAction<string>) {
+      const filtered_block_user_list = state.blocked_user.filter(
+        (pn) => pn !== action.payload
+      );
+      console.log({ filtered_block_user_list });
+      state.blocked_user = filtered_block_user_list;
       return state;
     },
-    removeFromBlockedBy: function (state, action: PayloadAction<string>) {
-      state.blocked_by.forEach((pn, index) => {
-        if (pn == action.payload) {
-          state.blocked_by.splice(index, 1);
-        }
-        return state;
-      });
+    remove_from_blocked_By: function (state, action: PayloadAction<string>) {
+      const filtered_block_by_list = state.blocked_by.filter(
+        (pn) => pn !== action.payload
+      );
+      console.log({ filtered_block_by_list });
+      state.blocked_by = filtered_block_by_list;
+      return state;
     },
     UninitializeUser: function () {
       return initialState;
@@ -79,9 +79,9 @@ export const {
   updateUser,
   setUserSocketId,
   UninitializeUser,
-  addToBlockedBy,
-  addToBlockedUser,
-  removeFromBlockedBy,
-  removeFromBlockedUser,
+  add_to_blocked_By,
+  add_to_blocked_User,
+  remove_from_blocked_User,
+  remove_from_blocked_By,
 } = userSlice.actions;
 export default userSlice.reducer;

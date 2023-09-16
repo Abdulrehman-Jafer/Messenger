@@ -50,6 +50,16 @@ export const api = createApi({
       },
     }),
 
+    unBlockUser: builder.mutation<any, any>({
+      query: (requestBody) => {
+        return {
+          url: "user/unblock",
+          method: "PUT",
+          body: requestBody,
+        };
+      },
+    }),
+
     validateToken: builder.query<any, any>({
       query: ({ authorization, user_id }) => {
         return {
@@ -219,6 +229,7 @@ export const {
   useAddToArchiveMutation,
   useRemoveFromArchiveMutation,
   useBlockUserMutation,
+  useUnBlockUserMutation,
 } = api;
 
 export default api;

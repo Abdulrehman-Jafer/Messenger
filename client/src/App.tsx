@@ -11,16 +11,16 @@ import { getSessionStorage } from "./utils/sessionSorage"
 import { useNavigate } from "react-router-dom"
 // import { useValidateQuery } from "./redux/service/api"
 import { useTypedSelector, useAppDispatch } from "./redux/store"
-import { User, addToBlockedBy, initializeUser, setUserSocketId } from "./redux/features/user-slice"
+import { add_to_blocked_By, initializeUser, remove_from_blocked_By, setUserSocketId } from "./redux/features/user-slice"
 // import PageNotFound from "./screens/404"
 import Contacts from "./screens/Contacts"
 import Contact_details from "./screens/Contact_details"
 import socket from "./socket-io/socket"
-import { addNewChat, userBlockedHandler, updateTypingStaus, updateUserOfflineStatusInChatspace, updateUserOnlineStatusInChatspace } from "./redux/features/chat-slice"
+import { addNewChat, chatBlockedHandler, chatUnblockedHandler, updateTypingStaus, updateUserOfflineStatusInChatspace, updateUserOnlineStatusInChatspace } from "./redux/features/chat-slice"
 import { addMessagesInChatspace, deleteMessage, updateChatspaceMessage } from "./redux/features/messages-slice"
 import Settings from "./screens/Settings"
 import notificatioSound from "./assets/whatssapp_web.mp3";
-import { contactBlockHandler, updateContactOfflineStatus, updateContactOnlineStatus } from "./redux/features/contact-slice"
+import { contactBlockHandler, contactUnblockHandler, updateContactOfflineStatus, updateContactOnlineStatus } from "./redux/features/contact-slice"
 import notficationSound from "./assets/whatssapp_web.mp3"
 import { useValidateTokenQuery } from "./redux/service/api"
 import useDispatchOnLoad from "./hooks/useDispatchOnLoad"
@@ -38,19 +38,16 @@ export default function App() {
 
   useEffect(() => {
     if (userReducer?._id) {
+      console.log("Naviagting from App.tsx to /chats")
       return navigate("/chats")
     } else {
       return navigate("/auth")
     }
-  }, [userReducer])
+  }, [userReducer._id])
 
   useEffect(() => {
-
     if (userReducer._id && chatReducer.isInitialized) {
-
       function user_online_Handler(user: any) {
-        const isBlocked = userReducer.blocked_by.includes((user.public_number))
-        if (isBlocked) return;
         dispatch(updateUserOnlineStatusInChatspace({ onlineUser_id: user._id, socketId: user.socketId }))
         dispatch(updateContactOnlineStatus(user))
       }
@@ -88,16 +85,21 @@ export default function App() {
       }
 
       function updateTypingStatus_handler(data: any) {
-        const isBlocked = userReducer.blocked_by.includes((data.public_number)) || userReducer.blocked_user.includes(data.public_number)
-        if (isBlocked) return;
         dispatch(updateTypingStaus(data))
       }
 
       function onBlockHandler(public_number: string) {
-        console.log("USer blocked", public_number)
-        dispatch(addToBlockedBy(public_number))
-        dispatch(userBlockedHandler(public_number))
+        console.log("User blocked", public_number)
+        dispatch(add_to_blocked_By(public_number))
+        dispatch(chatBlockedHandler(public_number))
         dispatch(contactBlockHandler(public_number))
+      }
+
+      function onUnblockHandler(public_number: string) {
+        console.log("User unblocked", public_number)
+        dispatch(remove_from_blocked_By(public_number))
+        dispatch(chatUnblockedHandler(public_number))
+        dispatch(contactUnblockHandler(public_number))
       }
 
       function newMessagerHandler(data: any) {
@@ -120,6 +122,7 @@ export default function App() {
       socket.on("new-messager", newMessagerHandler)
       socket.on("user-offline", user_offline_Handler)
       socket.on("user_blocked", onBlockHandler)
+      socket.on("user_unblocked", onUnblockHandler)
       return () => {
         // socket.disconnect()
         socket.off("set-socketId", socketIdHandler)
@@ -131,6 +134,7 @@ export default function App() {
         socket.off("user-offline", user_offline_Handler)
         socket.off("new-messager", newMessagerHandler)
         socket.off("user_blocked", onBlockHandler)
+        socket.off("user_unblocked", onUnblockHandler)
       }
     }
   }, [socket, userReducer, chatReducer])

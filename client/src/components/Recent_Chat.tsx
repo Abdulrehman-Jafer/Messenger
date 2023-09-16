@@ -5,13 +5,14 @@ import { useState, useEffect } from "react"
 import Add_Contact from "../modals/Add_Contact"
 import { useAppDispatch, useTypedSelector } from "../redux/store"
 import { Dropdown, MenuProps } from "antd"
-import { useDeleteChatspaceMutation, useAddToArchiveMutation, useRemoveFromArchiveMutation, useBlockUserMutation } from "../redux/service/api"
+import { useDeleteChatspaceMutation, useAddToArchiveMutation, useRemoveFromArchiveMutation, useBlockUserMutation, useUnBlockUserMutation } from "../redux/service/api"
 import { toast } from "react-hot-toast"
 import { removeChatspaceMessages } from "../redux/features/messages-slice"
-import { userBlockedHandler, updateArchiveStatus, updateUserOnlineStatusInChatspace } from "../redux/features/chat-slice"
-import dummy_user_image from "../assets/blocked_user.png"
+import { updateArchiveStatus, updateUserOnlineStatusInChatspace } from "../redux/features/chat-slice"
+import dummy_user_image from "../assets/dummy-profile.jpg"
 import { contactBlockHandler } from "../redux/features/contact-slice"
-import { addToBlockedUser } from "../redux/features/user-slice"
+import { add_to_blocked_User, remove_from_blocked_By, remove_from_blocked_User } from "../redux/features/user-slice"
+import WarningModal from "../modals/Warning"
 
 type Recent_Chat_Props = {
     name: string,
@@ -25,34 +26,47 @@ type Recent_Chat_Props = {
     isTyping?: boolean,
     isArchived: boolean,
     connected_to_public_number: string,
+    isBlockedByReceiver: boolean
 }
 
-export default function Recent_Chat({ active_status, chatspace_id, isArchived, isSaved, lastLogin, last_message, name, user_id, user_image, isTyping, connected_to_public_number, }: Recent_Chat_Props) {
+export default function Recent_Chat({ active_status, chatspace_id, isArchived, isSaved, lastLogin, last_message, name, user_id, user_image, isTyping, connected_to_public_number, isBlockedByReceiver }: Recent_Chat_Props) {
     const navigate = useNavigate()
     const [showContactModal, setShowContactModal] = useState(false)
     const [isDropDownOpen, setIsDropDownOpen] = useState(false)
-    const User = useTypedSelector(selector => selector.userReducer)
-    const [deleteChatspace, { isLoading, isError, data }] = useDeleteChatspaceMutation()
+    const user_Reducer = useTypedSelector(selector => selector.userReducer)
+    const [deleteChatspace, { isLoading: deleteChatLoading, isError: deleteChatError }] = useDeleteChatspaceMutation()
     const [addToArchive, { isLoading: archiveLoading, isError: archiveError }] = useAddToArchiveMutation()
     const [removeFromArchive, { isLoading: removeArchiveLoading, isError: removeArchiveError }] = useRemoveFromArchiveMutation()
-    const [blockUser, { isLoading: blockUserLoading, isError: blockUserError }] = useBlockUserMutation()
+    const [blockUser, { isLoading: blockLoading, isError: blockError, isSuccess: blockSuccess }] = useBlockUserMutation()
+    const [unBlockUser, { isLoading: unblockLoading, isSuccess: unblockSuccess, isError: unblockError }] = useUnBlockUserMutation()
+    const [showUnblockModal, setShowUnblockModal] = useState(false)
+    const [showBlockModal, setShowBlockModal] = useState(false)
     const dispatch = useAppDispatch()
 
 
     useEffect(() => {
-        if (!isLoading && isError) {
-            toast.error("Chatspace delete was not successfull")
+        if (!deleteChatLoading && deleteChatError) toast.error("Chatspace delete was not successfull")
+        if (!archiveLoading && archiveError) toast.error("Archiving failed!")
+        if (!removeArchiveLoading && removeArchiveError) toast.error("Unarchiving failed!")
+        if (!blockLoading && blockError) toast.error("Blocking user failed!")
+        if (!unblockLoading && unblockError) toast.error("Unblocking user failed!")
+    }, [deleteChatLoading, archiveLoading, removeArchiveLoading])
+
+    useEffect(() => {
+        if (blockSuccess && !blockLoading) {
+            setShowBlockModal(false)
+            toast.success(`Blocked ${name} successfully!`)
+            dispatch(add_to_blocked_User(connected_to_public_number))
         }
-        if (!archiveLoading && archiveError) {
-            toast.error("Archiving was not successfull")
+    }, [blockLoading])
+
+    useEffect(() => {
+        if (unblockSuccess && !unblockLoading) {
+            setShowUnblockModal(false)
+            toast.success(`${name} is unblocked!`)
+            dispatch(remove_from_blocked_User(connected_to_public_number))
         }
-        if (!removeArchiveLoading && removeArchiveError) {
-            toast.error("Unarchiving was not successfull")
-        }
-        if (!blockUserLoading && blockUserError) {
-            toast.error("Blocking user was not successfull")
-        }
-    }, [isLoading, archiveLoading, removeArchiveLoading, blockUserLoading])
+    }, [unblockLoading])
 
     const addArchiveHandler = () => {
         addToArchive({ chatspace_id, user_id })
@@ -77,8 +91,11 @@ export default function Recent_Chat({ active_status, chatspace_id, isArchived, i
     }
 
     const blockUserHandler = () => {
-        blockUser({ public_number: connected_to_public_number, user_id: User._id, user_public_number: User.public_number })
-        dispatch(addToBlockedUser(connected_to_public_number))
+        blockUser({ public_number: connected_to_public_number, user_id: user_Reducer._id, user_public_number: user_Reducer.public_number })
+    }
+
+    const unBlockUserHandler = () => {
+        unBlockUser({ public_number: connected_to_public_number, user_id: user_Reducer._id, user_public_number: user_Reducer.public_number })
     }
 
 
@@ -95,18 +112,18 @@ export default function Recent_Chat({ active_status, chatspace_id, isArchived, i
             key: '1',
         },
         {
-            label: <button onClick={blockUserHandler}>Block user</button>,
+            label: user_Reducer.blocked_user.includes(connected_to_public_number) ? <button onClick={() => { setIsDropDownOpen(false); setShowUnblockModal(true) }}>Remove from blacklist</button> : <button onClick={() => { setIsDropDownOpen(false); setShowBlockModal(true) }}>Add to blackList</button>,
             key: '2',
         },
     ]
 
     return (
         <>
-            <Dropdown menu={{ items }} trigger={["contextMenu"]} onOpenChange={(isopen) => setIsDropDownOpen(isopen)}>
-                <section tabIndex={0} className={`group flex justify-between items-center gap-4 p-[1rem] border-cyan-400 hover:bg-pink-red cursor-default ${isDropDownOpen && "bg-pink-red"}`} onClick={() => navigate(`/chats/${chatspace_id}`)}>
+            <Dropdown menu={{ items }} trigger={["contextMenu"]} onOpenChange={(isopen) => setIsDropDownOpen(isopen)} open={isDropDownOpen}>
+                <section tabIndex={0} className={`group flex justify-between items-center gap-4 p-[1rem] border-cyan-400 hover:bg-pink-red cursor-default ${isDropDownOpen && "bg-pink-red"} `} onClick={() => navigate(`/chats/${chatspace_id}`)}>
                     <div className="relative">
-                        <img src={user_image ? fixImageUrl(user_image) : dummy_user_image} alt="contact_image" className="h-10 w-10 rounded-full" />
-                        {lastLogin == 0 && (
+                        <img src={isBlockedByReceiver ? dummy_user_image : fixImageUrl(user_image)} alt="contact_image" className="h-10 w-10 rounded-full" />
+                        {(!isBlockedByReceiver && lastLogin == 0) && (
                             <i className="text-pink-red absolute right-[0rem] bottom-[0rem] backdrop-blur-sm rounded-full">
                                 <GoDotFill />
                             </i>
@@ -116,7 +133,7 @@ export default function Recent_Chat({ active_status, chatspace_id, isArchived, i
                         <div className="flex flex-col">
                             {!isSaved && <p className="invisible">DOM</p>}
                             <h3 className="text-[1.2rem] maxCharacter text-gray-800">{name}</h3>
-                            {isTyping ?
+                            {!isBlockedByReceiver && isTyping ?
                                 <small className="text-green-500 ADLaMFont">Typing....</small>
                                 :
                                 <small className="text-grayish text-style">{last_message}</small>
@@ -130,7 +147,9 @@ export default function Recent_Chat({ active_status, chatspace_id, isArchived, i
                     </div>
                 </section>
             </Dropdown>
-            <Add_Contact isModalOpen={showContactModal} setIsModalOpen={setShowContactModal} user_id={User._id} providedPublicNumber={name} />
+            <Add_Contact isModalOpen={showContactModal} setIsModalOpen={setShowContactModal} user_id={user_Reducer._id} providedPublicNumber={name} />
+            <WarningModal title={"Confirmation"} okText={blockLoading ? "Blocking..." : "Block"} handleOk={blockUserHandler} isModalOpen={showBlockModal} setIsModalOpen={setShowBlockModal} warningText={`Are you sure you want to block ${name}!`} />
+            <WarningModal title={"User is Blocked"} okText={unblockLoading ? "Unblocking..." : "Unblock"} handleOk={unBlockUserHandler} isModalOpen={showUnblockModal} setIsModalOpen={setShowUnblockModal} warningText={`Please unblock ${name} to send message!`} />
         </>
     )
 }
