@@ -23,6 +23,10 @@ import dummy_user_image from "../assets/dummy-profile.jpg"
 import WarningModal from "../modals/Warning";
 import toast from "react-hot-toast";
 import { remove_from_blocked_User } from "../redux/features/user-slice";
+import LoadingAnimation from "../animations/LoadingAnimation";
+import EmojiPicker from 'emoji-picker-react';
+import ChatEmoji from "../components/ChatEmoji";
+
 
 export default function Chat_space() {
     const [message, setMessage] = useState("");
@@ -43,6 +47,7 @@ export default function Chat_space() {
     // const [sendAttachmentApi] = useSendAttachmentMessageMutation();
     const [isTyping, setIsTyping] = useState(false);
     const [showUnblockModal, setShowUnblockModal] = useState(false)
+    const [isPreviewLoading, setIsPreviewLoading] = useState(false)
     const [unBlockUser, { isLoading: unblockLoading, isSuccess: unblockSuccess, isError: unblockError }] = useUnBlockUserMutation()
 
     const messageFrom = chatspace?.receiver.isSaved ? chatspace.receiver.contact.saved_as
@@ -61,16 +66,20 @@ export default function Chat_space() {
     useEffect(() => {
         const reader = new FileReader();
         if (!selectedFile) return;
+        setShowPreview(true);
+        setIsPreviewLoading(true)
         reader.readAsDataURL(selectedFile);
         reader.onload = (readerEvent) => {
             if (selectedFile?.type.includes("image")) {
                 setImagePreview(readerEvent.target?.result);
-                setShowPreview(true);
             } else if (selectedFile.type.includes("video")) {
                 setVideoPreview(readerEvent.target?.result);
-                setShowPreview(true);
             }
         };
+        reader.onloadend = ((e) => {
+            setIsPreviewLoading(false)
+
+        })
     }, [selectedFile]);
 
     const sendMessage = (e: React.FormEvent) => {
@@ -180,6 +189,10 @@ export default function Chat_space() {
         unBlockUser({ public_number: chatspace?.receiver.connected_to.public_number, user_id: userReducer._id, user_public_number: userReducer.public_number })
     }
 
+    const onEmojiClick = (e: any) => {
+        setMessage(prev => prev + e.emoji)
+    }
+
     useEffect(() => {
         window.scrollTo(0, document.body.scrollHeight);
     }, [chatspace?.receiver.connected_to.isTyping]);
@@ -270,7 +283,7 @@ export default function Chat_space() {
                                 onFocus={() => setIsTyping(true)}
                                 onBlur={() => setIsTyping(false)}
                                 type="text"
-                                className="border border-gray-400 outline-none w-full p-[1rem] bg-light-gray"
+                                className="border border-gray-400 outline-none w-full p-[1rem] bg-light-gray indent-8"
                                 placeholder="Type your message"
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
@@ -283,6 +296,9 @@ export default function Chat_space() {
                                 className="hidden"
                                 onChange={(e) => onSelectFileHandler(e)}
                             />
+                            <div className="absolute bottom-[5px] left-1">
+                                <ChatEmoji onEmojiClick={onEmojiClick} />
+                            </div>
                             <i
                                 className="absolute text-3xl text-grayish hover:text-light-pink bottom-3 right-12"
                                 onClick={() => fileInputRef.current?.click()}
@@ -304,14 +320,22 @@ export default function Chat_space() {
                     open={showPreview}
                     onOk={handleOk}
                     onCancel={handleCancel}
-                    okButtonProps={{ style: { background: "red" } }}
+                    okText="Send"
+                    okButtonProps={{ className: "custom-ok-button" }}
                 >
-                    {imagePreview && <img src={imagePreview} alt="selectedImage" />}
-                    {videoPreview && (
-                        <video muted={videoPreview!} width="750" height="500" controls>
-                            <source src={videoPreview} type="video/mp4" />
-                        </video>
-                    )}
+                    {isPreviewLoading ? <div className="flex items-center justify-center">
+                        <LoadingAnimation />
+                    </div> :
+                        <>
+                            {imagePreview && <img src={imagePreview} alt="selectedImage" />}
+                            {videoPreview && (
+                                <video muted={videoPreview!} width="750" height="500" controls>
+                                    <source src={videoPreview} type="video/mp4" />
+                                </video>
+                            )
+                            }
+                        </>
+                    }
                 </Modal>
             </main>
             <WarningModal title={"User is Blocked"} okText={unblockLoading ? "Unblocking.." : "Unblock"} handleOk={unBlockUserHandler} isModalOpen={showUnblockModal} setIsModalOpen={setShowUnblockModal} warningText="Please unblock the user to send message!" />

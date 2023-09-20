@@ -113,6 +113,11 @@ export default function App() {
           dispatch(addMessagesInChatspace({ creatingNewChatspace: true, chatspace_id: data.message.belongsTo, newMessage: data.message }))
         })
       }
+
+      function windowOfflineHandler() {
+        socket.disconnect()
+      }
+
       socket.on("user-online", user_online_Handler)
       socket.on("set-socketId", socketIdHandler)
       socket.on("receive-message", receiveMessageHandler)
@@ -123,6 +128,7 @@ export default function App() {
       socket.on("user-offline", user_offline_Handler)
       socket.on("user_blocked", onBlockHandler)
       socket.on("user_unblocked", onUnblockHandler)
+      window.addEventListener("offline", windowOfflineHandler)
       return () => {
         // socket.disconnect()
         socket.off("set-socketId", socketIdHandler)
@@ -135,6 +141,7 @@ export default function App() {
         socket.off("new-messager", newMessagerHandler)
         socket.off("user_blocked", onBlockHandler)
         socket.off("user_unblocked", onUnblockHandler)
+        window.removeEventListener("offline", windowOfflineHandler)
       }
     }
   }, [socket, userReducer, chatReducer])

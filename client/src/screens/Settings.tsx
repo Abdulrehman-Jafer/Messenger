@@ -77,7 +77,7 @@ export default function Settings() {
                 <Navbar />
             </section>
             <Update_Profile_Modal isModalOpen={showUpdateProfile} setIsModalOpen={setShowUpdateProfile} />
-            <Warning handleOk={() => { }} isModalOpen={showDeleteAccount} setIsModalOpen={setShowDeleteAccount} warningText='Your account will be deleted parmanently' />
+            <Warning okText='Delete' title='Warning' handleOk={() => { }} isModalOpen={showDeleteAccount} setIsModalOpen={setShowDeleteAccount} warningText='Your account will be deleted parmanently' />
         </>
     )
 }
