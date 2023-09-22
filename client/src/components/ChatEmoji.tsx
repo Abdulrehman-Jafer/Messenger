@@ -1,13 +1,15 @@
 import EmojiPicker from "emoji-picker-react"
-import { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, SetStateAction } from "react"
 import { BsEmojiSmileUpsideDown } from "react-icons/bs"
 
 type props = {
-    onEmojiClick: (e: any) => void
+    onEmojiClick: (e: any) => void,
+    showEmojiSelector: boolean,
+    setShowEmojiSelector: React.Dispatch<SetStateAction<boolean>>
+
 }
 
-export default function ChatEmoji({ onEmojiClick }: props) {
-    const [showEmojiSelector, setShowEmojiSelector] = useState(false)
+export default function ChatEmoji({ onEmojiClick, showEmojiSelector, setShowEmojiSelector }: props) {
     const componentRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {

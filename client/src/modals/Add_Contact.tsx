@@ -9,16 +9,12 @@ import { addToContacts } from '../redux/features/contact-slice';
 import { updateContactInfo } from '../redux/features/chat-slice';
 
 const Add_Contact = ({ isModalOpen, setIsModalOpen, user_id, providedPublicNumber }: { isModalOpen: boolean, setIsModalOpen: Dispatch<SetStateAction<boolean>>, user_id: string, providedPublicNumber?: string }) => {
-    const [fields, setFields] = useState<Record<string, any>>({
+    const [fields, setFields] = useState<Record<string, string | undefined>>({
         saved_as: "",
         public_number: ""
     })
 
     const dispatch = useAppDispatch()
-
-    useEffect(() => {
-        setFields(prev => ({ ...prev, public_number: providedPublicNumber }))
-    }, [])
 
     const [createContact, { isError, isLoading, isSuccess, error, data }] = useCreateContactMutation()
 
@@ -39,7 +35,7 @@ const Add_Contact = ({ isModalOpen, setIsModalOpen, user_id, providedPublicNumbe
     }, [isLoading])
 
     const handleOk = async () => {
-        await createContact({ ...fields, saved_by: user_id })
+        await createContact({ saved_as: fields.saved_as, saved_by: user_id, public_number: fields.public_number || providedPublicNumber })
     };
 
     const handleCancel = () => {
@@ -56,7 +52,7 @@ const Add_Contact = ({ isModalOpen, setIsModalOpen, user_id, providedPublicNumbe
         <Modal title="Create new contact" centered open={isModalOpen} onOk={handleOk} onCancel={handleCancel} okText={"Create"} okButtonProps={{ className: 'custom-ok-button', loading: isLoading, }}>
             <div className='flex flex-col gap-6'>
                 <Input name="saved_as" type="text" size="lg" label="Name" required value={fields.saved_as} onChange={(e) => onChangeHandler(e, setFields)} />
-                <Input name="public_number" type="text" size="lg" label="Contact's public number" required value={fields.public_number} onChange={(e) => onChangeHandler(e, setFields)} />
+                <Input name="public_number" type="text" size="lg" label="Contact's public number" required value={providedPublicNumber || fields.public_number} onChange={(e) => onChangeHandler(e, setFields)} />
             </div>
         </Modal>
     );

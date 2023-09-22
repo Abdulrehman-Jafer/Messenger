@@ -3,9 +3,9 @@ import { useTypedSelector } from "../redux/store"
 import { useParams } from "react-router-dom"
 
 export default function Contact_details() {
-  const contacts = useTypedSelector(selector => selector.contactReducer)
+  const contactReducer = useTypedSelector(selector => selector.contactReducer)
   const { contact_id } = useParams()
-  const currentContact = contacts.find(c => {
+  const currentContact = contactReducer.contacts.find(c => {
     return c._id === contact_id
   })
   /*
@@ -17,8 +17,9 @@ Delete Contact btn
 Block btn
  */
   return (
-    <section>
-      <p className="text-red-500">{currentContact?.saved_as}</p>
+    <section className="h-screen w-screen bg-black flex items-center justify-center">
+      {/* <p className="text-red-500">{currentContact?.saved_as}</p> */}
+      <h1 className="text-4xl bg-pink-red">Contacts Detail Page yet to design and implement</h1>
     </section>
   )
 }

@@ -48,6 +48,8 @@ export default function Chat_space() {
     const [isTyping, setIsTyping] = useState(false);
     const [showUnblockModal, setShowUnblockModal] = useState(false)
     const [isPreviewLoading, setIsPreviewLoading] = useState(false)
+    const [showEmojiSelector, setShowEmojiSelector] = useState(false)
+
     const [unBlockUser, { isLoading: unblockLoading, isSuccess: unblockSuccess, isError: unblockError }] = useUnBlockUserMutation()
 
     const messageFrom = chatspace?.receiver.isSaved ? chatspace.receiver.contact.saved_as
@@ -84,6 +86,7 @@ export default function Chat_space() {
 
     const sendMessage = (e: React.FormEvent) => {
         e.preventDefault();
+        setShowEmojiSelector(false)
         if (userReducer.blocked_user.includes(chatspace?.receiver.connected_to.public_number!)) {
             return setShowUnblockModal(true)
         }
@@ -201,7 +204,7 @@ export default function Chat_space() {
     return (
         <>
             <main className="flex flex-col">
-                <section className="flex p-[1rem] justify-between items-center sticky top-0 z-10 backdrop-blur-3xl">
+                <section className="flex p-[1rem] justify-between items-center sticky top-0 z-10 backdrop-blur-3xl border-b-2">
                     <i
                         className="text-[1.3rem] cursor-pointer"
                         onClick={() => navigate("/chats")}
@@ -297,7 +300,7 @@ export default function Chat_space() {
                                 onChange={(e) => onSelectFileHandler(e)}
                             />
                             <div className="absolute bottom-[5px] left-1">
-                                <ChatEmoji onEmojiClick={onEmojiClick} />
+                                <ChatEmoji onEmojiClick={onEmojiClick} showEmojiSelector={showEmojiSelector} setShowEmojiSelector={setShowEmojiSelector} />
                             </div>
                             <i
                                 className="absolute text-3xl text-grayish hover:text-light-pink bottom-3 right-12"
