@@ -52,6 +52,7 @@ export default function Chat_space() {
   const [showUnblockModal, setShowUnblockModal] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [showEmojiSelector, setShowEmojiSelector] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const [
     unBlockUser,
@@ -85,19 +86,26 @@ export default function Chat_space() {
   useEffect(() => {
     const reader = new FileReader();
     if (!selectedFile) return;
-    setShowPreview(true);
-    setIsPreviewLoading(true);
-    reader.readAsDataURL(selectedFile);
-    reader.onload = (readerEvent) => {
-      if (selectedFile?.type.includes("image")) {
-        setImagePreview(readerEvent.target?.result);
-      } else if (selectedFile.type.includes("video")) {
-        setVideoPreview(readerEvent.target?.result);
-      }
-    };
-    reader.onloadend = (e) => {
-      setIsPreviewLoading(false);
-    };
+    const size_in_mb = (selectedFile.size / (1024 * 1000)).toFixed(2);
+    if (+size_in_mb > 100) {
+      alert("Size of the file can't be greater than 100Mbs");
+      return;
+    } else {
+      setShowPreview(true);
+      setIsPreviewLoading(true);
+      reader.readAsDataURL(selectedFile);
+      // max size should be 100mb or less === 8 * 1024 * 1000 == 1mb
+      reader.onload = (readerEvent) => {
+        if (selectedFile?.type.includes("image")) {
+          setImagePreview(readerEvent.target?.result);
+        } else if (selectedFile.type.includes("video")) {
+          setVideoPreview(readerEvent.target?.result);
+        }
+      };
+      reader.onloadend = (e) => {
+        setIsPreviewLoading(false);
+      };
+    }
   }, [selectedFile]);
 
   const sendMessage = (e: React.FormEvent) => {
@@ -156,6 +164,7 @@ export default function Chat_space() {
   };
 
   const handleCancel = () => {
+    if (videoRef.current) videoRef.current.pause();
     setShowPreview(false);
     setImagePreview("");
     setVideoPreview("");
@@ -330,8 +339,10 @@ export default function Chat_space() {
               <textarea
                 onFocus={() => setIsTyping(true)}
                 onBlur={() => setIsTyping(false)}
+                onResize={(e) => e.preventDefault()}
+                rows={1}
                 // type="text"
-                className="border border-gray-400 outline-none w-full p-[1rem] bg-light-gray indent-8"
+                className="border border-gray-400 outline-none pl-[40px] pr-[90px] w-full bg-light-gray resize-none !h-[50px] placeholder: pt-3 placeholder:pl-1"
                 placeholder="Type your message"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
@@ -344,7 +355,7 @@ export default function Chat_space() {
                 className="hidden"
                 onChange={(e) => onSelectFileHandler(e)}
               />
-              <div className="absolute bottom-[5px] left-1">
+              <div className="absolute bottom-[10px] left-1">
                 <ChatEmoji
                   onEmojiClick={onEmojiClick}
                   showEmojiSelector={showEmojiSelector}
@@ -352,14 +363,14 @@ export default function Chat_space() {
                 />
               </div>
               <i
-                className="absolute text-3xl text-grayish hover:text-light-pink bottom-3 right-12"
+                className="absolute text-3xl text-grayish hover:text-light-pink bottom-[15px] right-12"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <AiOutlinePicture />
               </i>
               <button
                 type="submit"
-                className="absolute text-3xl text-grayish hover:text-light-pink bottom-3 right-2"
+                className="absolute text-3xl text-grayish hover:text-light-pink bottom-[15px] right-2"
                 onClick={(e) => sendMessage(e)}
               >
                 <AiOutlineSend />
@@ -383,7 +394,13 @@ export default function Chat_space() {
             <>
               {imagePreview && <img src={imagePreview} alt="selectedImage" />}
               {videoPreview && (
-                <video muted={videoPreview!} width="750" height="500" controls>
+                <video
+                  ref={videoRef}
+                  muted={videoPreview!}
+                  width="750"
+                  height="500"
+                  controls
+                >
                   <source src={videoPreview} type="video/mp4" />
                 </video>
               )}
