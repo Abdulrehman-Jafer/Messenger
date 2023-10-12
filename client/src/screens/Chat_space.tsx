@@ -118,7 +118,7 @@ export default function Chat_space() {
     ) {
       return setShowUnblockModal(true);
     }
-    const tempId = crypto.randomUUID();
+    const tempId = String(Math.random() * 100000);
     const data = {
       belongsTo: chatspace?._id,
       content: message,
